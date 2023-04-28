@@ -1,0 +1,20 @@
+[tool.pdm]
+
+[project]
+name = "irss"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "zhuxining", email = "zhuxining@outlook.com"},
+]
+dependencies = [
+    "fastapi>=0.95.1",
+    "uvicorn[standard]>=0.22.0",
+]
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MulanPSL2"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
