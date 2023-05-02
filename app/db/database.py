@@ -11,7 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 DATABASE_URL = "sqlite+aiosqlite:///./test.db"
 engine = create_async_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+async_session_maker = async_sessionmaker(
+    engine, expire_on_commit=False, class_=AsyncSession
+)
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:

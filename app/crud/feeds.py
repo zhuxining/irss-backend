@@ -1,14 +1,28 @@
-import select
+from fastapi import Depends
 from shutil import which
 from threading import get_ident
 from app.models.feeds import Feed
-from db.database import async_session_maker
+from app.db.database import async_session_maker
 from app import models, schemas
+from app.db.database import get_async_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-# def get_feeds(skip: int = 0, limit: int = 100):
-#     async with async_session_maker() as session:
-#         sql = select(Feed).where()
-#         feeds = session.execute(sql)
+async def create_feed(feed: schemas.FeedCreate, db: AsyncSession):
+    async with db.begin():
+        db.add(Feed(**feed.dict()))
 
-#     return feeds
+
+async def update_feed(feed_id: int, feed: schemas.FeedCreate, db: AsyncSession):
+    async with db.begin():
+        db.query(Feed).filter(Feed.id == feed_id).update(feed.dict())
+
+
+async def delete_feed(feed_id: int, db: AsyncSession):
+    async with db.begin():
+        db.query(Feed).filter(Feed.id == feed_id).delete()
+
+
+async def get_async_session() -> AsyncSession:
+    async with get_async_session() as session:
+        yield session
