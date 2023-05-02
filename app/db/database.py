@@ -1,21 +1,11 @@
-from importlib import metadata
-from typing import AsyncGenerator
+import motor.motor_asyncio
+from beanie import Document
+from fastapi_users.db import BaseOAuthAccount, BeanieBaseUser, BeanieUserDatabase
+from pydantic import Field
+from ..config import settings
 
-from sqlalchemy import MetaData, create_engine
-
-from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-
-DATABASE_URL = "sqlite+aiosqlite:///./test.db"
-engine = create_async_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-async_session_maker = async_sessionmaker(
-    engine, expire_on_commit=False, class_=AsyncSession
+DATABASE_URL = settings.db_url
+client = motor.motor_asyncio.AsyncIOMotorClient(
+    DATABASE_URL, uuidRepresentation="standard"
 )
-
-
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    async with async_session_maker() as session:
-        yield session
+db = client["irss-test"]

@@ -1,35 +1,18 @@
 from typing import List
 
-from fastapi import Depends
-from fastapi_users.db import (
-    SQLAlchemyBaseOAuthAccountTableUUID,
-    SQLAlchemyBaseUserTableUUID,
-    SQLAlchemyUserDatabase,
-)
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, relationship
-from app.db.database import get_async_session, engine
-from app.db.init_db import Base
+import motor.motor_asyncio
+from beanie import Document
+from fastapi_users.db import BaseOAuthAccount, BeanieBaseUser, BeanieUserDatabase
+from pydantic import Field
 
 
-# class Base(DeclarativeBase):
-#     pass
-
-
-class OAuthAccount(SQLAlchemyBaseOAuthAccountTableUUID, Base):
+class OAuthAccount(BaseOAuthAccount):
     pass
 
 
-class User(SQLAlchemyBaseUserTableUUID, Base):
-    oauth_accounts: Mapped[List[OAuthAccount]] = relationship(
-        "OAuthAccount", lazy="joined"
-    )
+class User(BeanieBaseUser, Document):
+    oauth_accounts: List[OAuthAccount] = Field(default_factory=list)
 
 
-# async def create_db_and_tables():
-#     async with engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.create_all)
-
-
-async def get_user_db(session: AsyncSession = Depends(get_async_session)):
-    yield SQLAlchemyUserDatabase(session, User, OAuthAccount)  # type: ignore
+async def get_user_db():
+    yield BeanieUserDatabase(User, OAuthAccount)  # type: ignore

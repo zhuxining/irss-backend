@@ -2,25 +2,23 @@
 
 [tool.pdm.dev-dependencies]
 dev = [
-    "aiosqlite>=0.19.0",
+
 ]
 [project]
-name = "irss"
-version = "0.1.0"
+name = ""
+version = ""
 description = ""
 authors = [
     {name = "zhuxining", email = "zhuxining@outlook.com"},
 ]
 dependencies = [
+    "fastapi-users[beanie,oauth]>=11.0.0",
     "fastapi>=0.95.1",
     "uvicorn[standard]>=0.22.0",
-    "fastapi-users[oauth,sqlalchemy]>=11.0.0",
     "setuptools>=67.7.2",
-    "alembic>=1.10.4",
 ]
 requires-python = ">=3.10"
-readme = "README.md"
-license = {text = "MulanPSL2"}
+license = {text = "MIT"}
 
 [build-system]
 requires = ["pdm-backend"]

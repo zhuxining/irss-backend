@@ -1,19 +1,18 @@
 import os
-import uuid
 from typing import Optional
 
+from beanie import PydanticObjectId
 from fastapi import Depends, Request
-from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
+from fastapi_users import BaseUserManager, FastAPIUsers
 from fastapi_users.authentication import (
     AuthenticationBackend,
     BearerTransport,
     JWTStrategy,
 )
-from fastapi_users.db import SQLAlchemyUserDatabase
+from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 from httpx_oauth.clients.google import GoogleOAuth2
 
 from app.models.users import User, get_user_db
-
 
 SECRET = "SECRET"
 
@@ -23,7 +22,7 @@ google_oauth_client = GoogleOAuth2(
 )
 
 
-class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
+class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):  # type: ignore
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
 
@@ -41,7 +40,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         print(f"Verification requested for user {user.id}. Verification token: {token}")
 
 
-async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)):
+async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
     yield UserManager(user_db)
 
 
@@ -58,6 +57,6 @@ auth_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy,
 )
 
-fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
+fastapi_users = FastAPIUsers[User, PydanticObjectId](get_user_manager, [auth_backend])  # type: ignore
 
 current_active_user = fastapi_users.current_user(active=True)

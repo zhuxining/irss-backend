@@ -1,11 +1,15 @@
-from sqlalchemy.orm import DeclarativeBase
-from app.db.database import engine
+from beanie import init_beanie
+
+from app.models.users import User
+from app.models import mans
+from app.db.database import db
 
 
-class Base(DeclarativeBase):
-    pass
-
-
-async def create_db_and_tables():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+async def init_db():
+    await init_beanie(
+        database=db,
+        document_models=[
+            User,
+            mans.Man,
+        ],  # type: ignore
+    )

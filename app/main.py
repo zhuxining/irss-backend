@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 
-from .db.init_db import create_db_and_tables
-from .models.users import User
+from .db.init_db import init_db
 
-# from .models.feeds import Feed
+
 from .api.api_v1.api import api_router
 from .api.api_v1.endpoints import auth
 from .config import settings
@@ -27,5 +26,10 @@ async def root():
 
 @app.on_event("startup")
 async def on_startup():
-    # Not needed if you setup a migration system like Alembic
-    await create_db_and_tables()
+    print("---startup---")
+    await init_db()
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    print("---shutdown---")
