@@ -1,8 +1,9 @@
 from beanie import init_beanie
 
 from app.models.users import User
-from app.models import mans
-from app.db.database import db
+from app.models.feeds import Feed
+from app.models.mans import Man
+from .database import db
 
 
 async def init_db():
@@ -10,6 +11,7 @@ async def init_db():
         database=db,
         document_models=[
             User,
-            mans.Man,
+            Man,
+            Feed,
         ],  # type: ignore
     )
