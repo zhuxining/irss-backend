@@ -2,16 +2,6 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python:test",
-      "type": "python",
-      "request": "launch",
-      "module": "uvicorn",
-      "args": ["exam:app"],
-      "jinja": true,
-      "justMyCode": true
-    },
-
-    {
       "name": "Python: FastAPI",
       "type": "python",
       "request": "launch",
