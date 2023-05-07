@@ -3,6 +3,8 @@ from beanie import init_beanie
 from app.models.users import User
 from app.models.feeds import Feed
 from app.models.mans import Man
+from app.item.model import Item
+
 from .database import db
 
 
@@ -13,5 +15,6 @@ async def init_db():
             User,
             Man,
             Feed,
+            Item,
         ],  # type: ignore
     )
