@@ -1,15 +1,18 @@
 from typing import Any
 from pydantic import BaseModel
+from uuid import UUID, uuid4
+from pydantic import Field
+import socket
 
 
 class ResponseModel(BaseModel):
     success: bool
-    data: dict = {}
+    data: Any = {}
     errorCode: str = ""
     errorMessage: str = ""
     showType: int = 0
-    traceId: str = ""
-    host: str = ""
+    traceId: UUID = Field(default_factory=uuid4)
+    host: str = socket.gethostbyname(socket.gethostname())
 
 
 # export interface response {

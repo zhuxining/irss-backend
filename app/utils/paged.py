@@ -12,7 +12,7 @@ async def paginated_find(
     total = await model.find(query).count()
     results = (
         await model.find(query)
-        .sort(sort)
+        .sort("-" + sort)
         .skip((current - 1) * page_size)
         .limit(page_size)
         .to_list()
