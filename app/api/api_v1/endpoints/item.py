@@ -1,11 +1,15 @@
+from datetime import date
 from bson import ObjectId
-from fastapi import APIRouter
+from fastapi import APIRouter, Path
 
 from typing import List
 
-from app.item import schema, crud, model
-from app.item.crud import get_items
+from app.items_example import schema, crud, model
+from app.items_example.model import Item
 from fastapi import HTTPException
+
+from app.utils.paged import paginated_find
+from app.utils.response_format import ResponseModel
 
 router = APIRouter()
 
@@ -17,13 +21,14 @@ async def create_item(item: schema.ItemCreate):
 
 # @router.get("/items", response_model=List[schema.Item])
 # async def get_items():
-#     db_items = await model.Item.all().to_list()
-#     return db_items
+#     return await crud.get_items()
 
 
-@router.get("/items", response_model=List[schema.Item])
-async def get_items():
-    return await crud.get_items()
+@router.get("/items")
+async def get_items(page_size: int = 10, current: int = 1, sort: str = "_id"):
+    # await paginated_find(model.Item, {}, page_size, page, sort)
+    db_date = await paginated_find(Item, {}, current, page_size, sort)
+    return ResponseModel(success=True, data=db_date)
 
 
 @router.get("/items/{item_id}", response_model=schema.Item)

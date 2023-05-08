@@ -1,19 +1,19 @@
 from bson import ObjectId
-from app.item import model, schema
-from app.item.model import Item
+from app.items_example import model, schema
+from app.items_example.model import Item
 
 from typing import List
 from fastapi import HTTPException
 
 
-async def create_item(item: schema.ItemCreate) -> Item:
+async def create_item(item: schema.ItemCreate) -> model.Item:
     db_item = Item(**item.dict())
-    await Item.save(db_item)
+    await Item.insert_one(db_item)
     return db_item
 
 
 async def get_items() -> List[Item]:
-    db_items = await Item.find_all().limit(3).to_list()
+    db_items = await Item.find_all().to_list()
     return db_items
 
 
@@ -25,12 +25,9 @@ async def get_item(item_id: str) -> Item:
 
 
 async def update_item(item_id: str, item: schema.ItemUpdate) -> Item:
-    db_item = await Item.find_one({"_id": ObjectId(item_id)})
-    db_item = Item(**item.dict())
-    await Item.update(db_item)
-    return db_item
+    await model.Item.find_one({"_id": ObjectId(item_id)}).update_one({"$set": item})
+    return await get_item(item_id)
 
 
 async def delete_item(item_id: str):
-    db_item = await Item.find_one({"_id": ObjectId(item_id)})
-    await db_item.delete()
+    await Item.find_one({"_id": ObjectId(item_id)}).delete()

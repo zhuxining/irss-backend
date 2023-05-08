@@ -3,7 +3,7 @@ from beanie import init_beanie
 from app.models.users import User
 from app.models.feeds import Feed
 from app.models.mans import Man
-from app.item.model import Item
+from app.items_example.model import Item
 
 from .database import db
 
