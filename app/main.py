@@ -1,12 +1,9 @@
 from fastapi import FastAPI
 
-from .db.init_db import init_db
-
-
 from .api.api_v1.api import api_router
 from .api.api_v1.endpoints import auth
 from .config import settings
-
+from .db.init_db import init_db
 
 app = FastAPI(
     title=settings.app_name,
