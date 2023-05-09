@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     app_name: str = "iRss"
     app_version: str = "0.0.1"
-    app_description: str = "a rss reader"
+    app_description: str = "iRss is a RSS reader"
 
     api_version: str = "1.0.0"
     api_prefix: str = "/api/v1"

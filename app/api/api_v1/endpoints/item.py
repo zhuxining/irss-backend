@@ -5,12 +5,12 @@ from fastapi import APIRouter, Body, Path, Query
 
 from app.items_example import crud, model, schema
 from app.utils.paged import paginated_find
-from app.utils.response_format import ResponseModel
+from app.utils.response_model import ResponseModel
 
 router = APIRouter()
 
 
-@router.post("", response_model=ResponseModel)
+@router.post("/item", response_model=ResponseModel)
 async def create_item(item: schema.ItemCreate):
     """
     # 请求体
@@ -20,7 +20,7 @@ async def create_item(item: schema.ItemCreate):
     return ResponseModel(success=True, data=db_data)
 
 
-@router.get("/", response_model=ResponseModel)
+@router.get("/item/", response_model=ResponseModel)
 async def get_items(
     q: Annotated[str | None, Query(max_length=50)] = None,
     page_size: int = 10,
@@ -40,7 +40,7 @@ async def get_items(
     return ResponseModel(success=True, data=db_data)
 
 
-@router.post("/search/", response_model=ResponseModel)
+@router.post("/item/search/", response_model=ResponseModel)
 async def search_items(
     filters: dict = Body(example={"key1": "value", "key2": "value"}),
     page_size: int = 10,
@@ -55,7 +55,7 @@ async def search_items(
     return ResponseModel(success=True, data=db_data)
 
 
-@router.get("/{item_id}/", response_model=ResponseModel)
+@router.get("/item/{item_id}/", response_model=ResponseModel)
 async def get_item(item_id: str):
     """
     # 请求体
@@ -75,7 +75,7 @@ async def update_item(item_id: str, item: schema.ItemUpdate):
     return ResponseModel(success=True, data=db_data)
 
 
-@router.delete("/{item_id}/", response_model=ResponseModel)
+@router.delete("/item/{item_id}/", response_model=ResponseModel)
 async def delete_item(item_id: str):
     """
     # 请求体

@@ -12,7 +12,8 @@ class ResponseModel(BaseModel):
     errorMessage: str = ""
     showType: int = 0
     traceId: UUID = Field(default_factory=uuid4)
-    host: str = socket.gethostbyname(socket.gethostname())
+    # host: str = socket.gethostbyname(socket.gethostname())
+    host: str = socket.gethostname()
 
 
 # export interface response {
