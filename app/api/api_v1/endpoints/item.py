@@ -1,7 +1,6 @@
-from typing import Annotated, List, Optional
+from typing import Annotated
 
-from bson import ObjectId
-from fastapi import APIRouter, Body, Path, Query
+from fastapi import APIRouter, Body, Query
 
 from app.items_example import crud, model, schema
 from app.utils.paged import paginated_find
@@ -13,9 +12,9 @@ router = APIRouter()
 @router.post("/item", response_model=ResponseModel)
 async def create_item(item: schema.ItemCreate):
     """
-    # 请求体
+    create a new
     """
-    #
+    # annotating
     db_data = await crud.create_item(item)
     return ResponseModel(success=True, data=db_data)
 
@@ -28,9 +27,9 @@ async def get_items(
     sort: str = "_id",
 ):
     """
-    # 请求体
+    get by fuzzy query then paged
     """
-    #
+    # annotating
     filters = {}
     if q:
         filters["$or"] = [{"name": {"$regex": q}}, {"description": {"$regex": q}}]
@@ -48,9 +47,9 @@ async def search_items(
     sort: str = "_id",
 ):
     """
-    # 请求体
+    post filters for search then paged
     """
-    #
+    # annotating
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
     return ResponseModel(success=True, data=db_data)
 
@@ -58,9 +57,9 @@ async def search_items(
 @router.get("/item/{item_id}/", response_model=ResponseModel)
 async def get_item(item_id: str):
     """
-    # 请求体
+    get by id
     """
-    #
+    # annotating
     db_data = await crud.get_item(item_id)
     return ResponseModel(success=True, data=db_data)
 
@@ -68,9 +67,9 @@ async def get_item(item_id: str):
 @router.put("/{item_id}/", response_model=ResponseModel)
 async def update_item(item_id: str, item: schema.ItemUpdate):
     """
-    # 请求体
+    put by id
     """
-    #
+    # annotating
     db_data = await crud.update_item(item_id, item)
     return ResponseModel(success=True, data=db_data)
 
@@ -78,8 +77,8 @@ async def update_item(item_id: str, item: schema.ItemUpdate):
 @router.delete("/item/{item_id}/", response_model=ResponseModel)
 async def delete_item(item_id: str):
     """
-    # 请求体
+    delete by id
     """
-    #
+    # annotating
     await crud.delete_item(item_id)
     return ResponseModel(success=True, data={})
