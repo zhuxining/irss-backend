@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class ResponseModel(BaseModel):
-    success: bool
+    success: bool = True
     data: Any = {}
     errorCode: str = ""
     errorMessage: str = ""
