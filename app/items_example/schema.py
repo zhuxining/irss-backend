@@ -1,5 +1,6 @@
+from typing import List, Set, Union
+
 from pydantic import BaseModel
-from typing import Set, Union, List
 
 
 class Image(BaseModel):

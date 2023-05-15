@@ -1,8 +1,9 @@
-from beanie import Document, Indexed
 from typing import Any, Set, Union
 from uuid import UUID, uuid4
-from pydantic import Field
+
 import pymongo
+from beanie import Document, Indexed
+from pydantic import Field
 from pymongo import IndexModel
 
 

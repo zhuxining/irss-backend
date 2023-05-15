@@ -1,9 +1,10 @@
+from typing import List
+
 from bson import ObjectId
+from fastapi import HTTPException
+
 from app.items_example import model, schema
 from app.items_example.model import Item
-
-from typing import List
-from fastapi import HTTPException
 
 
 async def create_item(item: schema.ItemCreate) -> model.Item:

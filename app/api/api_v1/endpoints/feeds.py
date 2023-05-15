@@ -1,10 +1,11 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import ValidationError
 
-from typing import List
+from app.crud.feeds import get_feeds
 from app.models.feeds import Feed
 from app.schemas.feeds import FeedBase, FeedTest
-from app.crud.feeds import get_feeds
 
 router = APIRouter()
 

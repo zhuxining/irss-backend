@@ -1,9 +1,8 @@
 from beanie import init_beanie
 
-from app.models.users import User
-from app.models.feeds import Feed
-
 from app.items_example.model import Item
+from app.models.feeds import Feed
+from app.models.users import User
 
 from .database import db
 

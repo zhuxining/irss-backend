@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends
 
-from app.models.users import User
-from app.schemas.users import UserCreate, UserRead
 from app.crud.users import (
     SECRET,
     auth_backend,
@@ -9,6 +7,8 @@ from app.crud.users import (
     fastapi_users,
     google_oauth_client,
 )
+from app.models.users import User
+from app.schemas.users import UserCreate, UserRead
 
 router = APIRouter()
 
