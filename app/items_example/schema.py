@@ -1,5 +1,3 @@
-from typing import List, Set, Union
-
 from pydantic import BaseModel
 
 
@@ -13,9 +11,9 @@ class ItemBase(BaseModel):
     description: str
     num: int
     price: float
-    tax: Union[float, None] = None
-    tags: Set[str] = set()
-    image: Union[List[Image], None] = None
+    tax: float | None = None
+    tags: set[str] = set()
+    image: list[Image] | None = None
 
 
 class ItemCreate(ItemBase):
@@ -25,7 +23,6 @@ class ItemCreate(ItemBase):
 
 class ItemUpdate(ItemBase):
     description: str
-    description1: str
 
 
 class Item(ItemBase):

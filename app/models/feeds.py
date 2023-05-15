@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Any, Set, Union
 from uuid import UUID, uuid4
 
 import pymongo

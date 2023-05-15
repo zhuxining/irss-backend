@@ -1,8 +1,11 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Query
+from beanie import PydanticObjectId
+from fastapi import APIRouter, Body, Depends, Query
 
+from app.crud.users import current_active_user
 from app.items_example import crud, model, schema
+from app.models.users import User
 from app.utils.paged import paginated_find
 from app.utils.response_model import ResponseModel
 
@@ -32,7 +35,7 @@ async def get_items(
     # annotating
     filters = {}
     if q:
-        filters["$or"] = [{"name": {"$regex": q}}, {"description": {"$regex": q}}]
+        filters = {"$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}]}
 
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
 
@@ -41,7 +44,7 @@ async def get_items(
 
 @router.post("/item/search/", response_model=ResponseModel)
 async def search_items(
-    filters: dict = Body(example={"key1": "value", "key2": "value"}),
+    filters: dict = Body(example={"query key": "query value"}, title="query"),
     page_size: int = 10,
     current: int = 1,
     sort: str = "_id",
@@ -55,7 +58,7 @@ async def search_items(
 
 
 @router.get("/item/{item_id}/", response_model=ResponseModel)
-async def get_item(item_id: str):
+async def get_item(item_id: PydanticObjectId):
     """
     get by id
     """
@@ -64,8 +67,8 @@ async def get_item(item_id: str):
     return ResponseModel(success=True, data=db_data)
 
 
-@router.put("/{item_id}/", response_model=ResponseModel)
-async def update_item(item_id: str, item: schema.ItemUpdate):
+@router.put("/item/{item_id}/", response_model=ResponseModel)
+async def update_item(item_id: PydanticObjectId, item: schema.ItemUpdate):
     """
     put by id
     """
@@ -75,10 +78,104 @@ async def update_item(item_id: str, item: schema.ItemUpdate):
 
 
 @router.delete("/item/{item_id}/", response_model=ResponseModel)
-async def delete_item(item_id: str):
+async def delete_item(item_id: PydanticObjectId):
     """
     delete by id
     """
     # annotating
     await crud.delete_item(item_id)
+    return ResponseModel(success=True, data={})
+
+
+@router.post("/user_item", response_model=ResponseModel)
+async def create_user_item(
+    item: schema.ItemCreate, user: User = Depends(current_active_user)
+):
+    """
+    create a new
+    """
+    # annotating
+    db_data = await crud.create_user_item(item, user.id)
+    return ResponseModel(success=True, data=db_data)
+
+
+@router.get("/user_item/", response_model=ResponseModel)
+async def get_user_items(
+    q: Annotated[str | None, Query(max_length=50)] = None,
+    page_size: int = 10,
+    current: int = 1,
+    sort: str = "_id",
+    user: User = Depends(current_active_user),
+):
+    """
+    get by fuzzy query then paged
+    """
+    # annotating
+    filters = {}
+    if q:
+        filters = {
+            "$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}],
+            "created_by": user.id,
+        }
+    else:
+        filters = {"created_by": user.id}
+
+    db_data = await paginated_find(model.Item, filters, current, page_size, sort)
+
+    return ResponseModel(success=True, data=db_data)
+
+
+@router.post("/user_item/search/", response_model=ResponseModel)
+async def search_user_items(
+    filters: dict = Body(example={"query key": "query value"}, title="query"),
+    page_size: int = 10,
+    current: int = 1,
+    sort: str = "_id",
+    user: User = Depends(current_active_user),
+):
+    """
+    post filters for search then paged
+    """
+    # annotating
+    filters = {**filters, "created_by": user.id}
+    db_data = await paginated_find(model.Item, filters, current, page_size, sort)
+    return ResponseModel(success=True, data=db_data)
+
+
+@router.get("/user_item/{item_id}/", response_model=ResponseModel)
+async def get_user_item(
+    item_id: PydanticObjectId, user: User = Depends(current_active_user)
+):
+    """
+    get by id and current_user
+    """
+    # annotating
+    db_data = await crud.get_user_item(item_id, user.id)
+    return ResponseModel(success=True, data=db_data)
+
+
+@router.put("/user_item/{item_id}/", response_model=ResponseModel)
+async def update_user_item(
+    item_id: PydanticObjectId,
+    item: schema.ItemUpdate,
+    user: User = Depends(current_active_user),
+):
+    """
+    put by id
+    """
+    # annotating
+    db_data = await crud.update_user_item(item_id, item, user.id)
+    return ResponseModel(success=True, data=db_data)
+
+
+@router.delete("/user_item/{item_id}/", response_model=ResponseModel)
+async def delete_user_item(
+    item_id: PydanticObjectId,
+    user: User = Depends(current_active_user),
+):
+    """
+    delete by id
+    """
+    # annotating
+    await crud.delete_user_item(item_id, user.id)
     return ResponseModel(success=True, data={})

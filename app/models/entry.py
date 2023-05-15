@@ -1,9 +1,8 @@
 from datetime import datetime
-from typing import Any, Set, Union
 from uuid import UUID, uuid4
 
 import pymongo
-from beanie import Document, Indexed
+from beanie import Document
 from pydantic import BaseModel, Field
 from pymongo import IndexModel
 

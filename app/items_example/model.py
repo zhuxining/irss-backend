@@ -1,8 +1,8 @@
-from typing import Any, Set, Union
+from datetime import datetime
 from uuid import UUID, uuid4
 
 import pymongo
-from beanie import Document, Indexed
+from beanie import Document, PydanticObjectId
 from pydantic import Field
 from pymongo import IndexModel
 
@@ -13,9 +13,13 @@ class Item(Document):
     description: str
     num: int
     price: float
-    tax: Union[float, None] = None
-    tags: Set[str] = set()
-    image: Any = None
+    tax: float | None = None
+    tags: set[str] = set()
+    image: list | None = None
+    created_by: PydanticObjectId | None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_by: PydanticObjectId | None = None
+    updated_at: datetime | None = None
 
     class Settings:
         name = "item"
