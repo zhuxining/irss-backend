@@ -1,6 +1,5 @@
 import json
 from datetime import datetime
-from typing import Annotated
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, Depends, Query
@@ -27,34 +26,53 @@ async def create_item(item: schema.ItemCreate):
 
 @router.get("/items", response_model=ResponseModel)
 async def list_items(
-    _id: PydanticObjectId = Query(default=None),
+    id: str = Query(default=None, description="mongodb ObjectId"),
     name: str = Query(default=None, max_length=50, description="fuzzy"),
     description: str = Query(default=None, max_length=50, description="fuzzy"),
-    range_create_time: Json = Query(default=None, description=""),
-    page_size: int = Query(default=10, description=""),
-    current: int = Query(default=1, description=""),
+    range_create_time: Json = Query(
+        default=None,
+        example={
+            "start_time": "2000-01-01T00:00:00.000000",
+            "end_time": "2100-01-01T00:00:00.000000",
+        },
+        description="json",
+    ),
+    range_num: Json = Query(
+        default=None,
+        example={"min_value": 0, "max_value": 100},
+        description="json",
+    ),
+    page_size: int = Query(example=10, description=""),
+    current: int = Query(example=1, description=""),
     sort: str = Query(
-        default="_id", description="default desc, _id = create_item desc"
+        default="create_time",
+        example="'id':-1",
+        description="1:asc, -1:desc, default desc, _id = create_time desc",
     ),
 ):
     """
     get list by filters then paged
     """
     # annotating
-    # range_create_time = json.loads(range_create_time)
-    start = datetime.fromisoformat(range_create_time["start"])
-    end = datetime.fromisoformat(range_create_time["end"])
+
     filters = {}
-    if _id:
-        filters["_id"] = _id
+    if id:
+        filters["_id"] = PydanticObjectId(id)
     if name:
         filters["name"] = {"$regex": name}
     if description:
         filters["description"] = {"$regex": description}
     if range_create_time:
-        filters["range_create_time"] = {
+        start = datetime.fromisoformat(range_create_time["start_time"])
+        end = datetime.fromisoformat(range_create_time["end_time"])
+        filters["create_time"] = {
             "$gte": start,
             "$lte": end,
+        }
+    if range_num:
+        filters["num"] = {
+            "$gte": range_num["min_value"],
+            "$lte": range_num["max_value"],
         }
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
 
@@ -93,11 +111,13 @@ async def delete_item(item_id: PydanticObjectId):
 
 @router.get("/items/search/", response_model=ResponseModel)
 async def search_items(
-    q: str = Query(max_length=50, default=None, description="fuzzy:name、description"),
-    page_size: int = Query(default=10, description=""),
-    current: int = Query(default=1, description=""),
+    q: str = Query(default=None, max_length=50, description="fuzzy:name、description"),
+    page_size: int = Query(example=10, description=""),
+    current: int = Query(example=1, description=""),
     sort: str = Query(
-        default="_id", description="default desc, _id = create_item desc"
+        default="create_time",
+        example="'id':-1",
+        description="1:asc, -1:desc, default desc, _id = create_time desc",
     ),
 ):
     """
@@ -115,11 +135,13 @@ async def search_items(
 
 @router.post("/item/query/", response_model=ResponseModel)
 async def query_items(
-    filters: dict = Body(example={"query key": "query value"}, description="query"),
-    page_size: int = Query(default=10, description=""),
-    current: int = Query(default=1, description=""),
+    filters: dict = Body(default=None, example={"name": "string"}, description="query"),
+    page_size: int = Query(example=10, description=""),
+    current: int = Query(example=1, description=""),
     sort: str = Query(
-        default="_id", description="default desc, _id = create_item desc"
+        default="create_time",
+        example="'id':-1",
+        description="1:asc, -1:desc, default desc, _id = create_time desc",
     ),
 ):
     """
@@ -130,7 +152,7 @@ async def query_items(
     return ResponseModel(success=True, data=db_data)
 
 
-@router.post("/user_item", response_model=ResponseModel)
+@router.post("/user-item", response_model=ResponseModel)
 async def create_user_item(
     item: schema.ItemCreate, user: User = Depends(current_active_user)
 ):
@@ -142,50 +164,63 @@ async def create_user_item(
     return ResponseModel(success=True, data=db_data)
 
 
-@router.get("/user_items/", response_model=ResponseModel)
+@router.get("/user-items/", response_model=ResponseModel)
 async def list_user_items(
-    q: Annotated[str | None, Query(max_length=50)] = None,
-    page_size: int = 10,
-    current: int = 1,
-    sort: str = "_id",
+    id: str = Query(default=None, description="mongodb ObjectId"),
+    name: str = Query(default=None, max_length=50, description="fuzzy"),
+    description: str = Query(default=None, max_length=50, description="fuzzy"),
+    range_create_time: Json = Query(
+        default=None,
+        example={
+            "start_time": "2000-01-01T00:00:00.000000",
+            "end_time": "2100-01-01T00:00:00.000000",
+        },
+        description="json",
+    ),
+    range_num: Json = Query(
+        default=None,
+        example={"min_value": 0, "max_value": 100},
+        description="json",
+    ),
+    page_size: int = Query(example=10, description=""),
+    current: int = Query(example=1, description=""),
+    sort: str = Query(
+        default="create_time",
+        example="'id':-1",
+        description="1:asc, -1:desc, default desc, _id = create_time desc",
+    ),
     user: User = Depends(current_active_user),
 ):
     """
-    get by fuzzy query then paged
+    get list by filters and current_active_user then paged
     """
     # annotating
+
     filters = {}
-    if q:
-        filters = {
-            "$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}],
-            "create_by": user.id,
+    if id:
+        filters["_id"] = PydanticObjectId(id)
+    if name:
+        filters["name"] = {"$regex": name}
+    if description:
+        filters["description"] = {"$regex": description}
+    if range_create_time:
+        start = datetime.fromisoformat(range_create_time["start_time"])
+        end = datetime.fromisoformat(range_create_time["end_time"])
+        filters["create_time"] = {
+            "$gte": start,
+            "$lte": end,
         }
-    else:
-        filters = {"create_by": user.id}
-
-    db_data = await paginated_find(model.Item, filters, current, page_size, sort)
-
-    return ResponseModel(success=True, data=db_data)
-
-
-@router.post("/user_item/search/", response_model=ResponseModel)
-async def search_user_items(
-    filters: dict = Body(example={"query key": "query value"}, title="query"),
-    page_size: int = 10,
-    current: int = 1,
-    sort: str = "_id",
-    user: User = Depends(current_active_user),
-):
-    """
-    post filters for search then paged
-    """
-    # annotating
+    if range_num:
+        filters["num"] = {
+            "$gte": range_num["min_value"],
+            "$lte": range_num["max_value"],
+        }
     filters = {**filters, "create_by": user.id}
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
     return ResponseModel(success=True, data=db_data)
 
 
-@router.get("/user_item/{item_id}/", response_model=ResponseModel)
+@router.get("/user-item/{item_id}/", response_model=ResponseModel)
 async def get_user_item(
     item_id: PydanticObjectId, user: User = Depends(current_active_user)
 ):
@@ -197,7 +232,7 @@ async def get_user_item(
     return ResponseModel(success=True, data=db_data)
 
 
-@router.put("/user_item/{item_id}/", response_model=ResponseModel)
+@router.put("/user-item/{item_id}/", response_model=ResponseModel)
 async def update_user_item(
     item_id: PydanticObjectId,
     item: schema.ItemUpdate,
@@ -211,7 +246,7 @@ async def update_user_item(
     return ResponseModel(success=True, data=db_data)
 
 
-@router.delete("/user_item/{item_id}/", response_model=ResponseModel)
+@router.delete("/user-item/{item_id}/", response_model=ResponseModel)
 async def delete_user_item(
     item_id: PydanticObjectId,
     user: User = Depends(current_active_user),
@@ -222,3 +257,52 @@ async def delete_user_item(
     # annotating
     await crud.delete_user_item(item_id, user.id)
     return ResponseModel(success=True, data={})
+
+
+@router.get("/user-items/search/", response_model=ResponseModel)
+async def search_user_items(
+    q: str = Query(default=None, max_length=50, description="fuzzy:name、description"),
+    page_size: int = Query(example=10, description=""),
+    current: int = Query(example=1, description=""),
+    sort: str = Query(
+        default="create_time",
+        example="'id':-1",
+        description="1:asc, -1:desc, default desc, _id = create_time desc",
+    ),
+    user: User = Depends(current_active_user),
+):
+    """
+    get by fuzzy query then paged
+    """
+    # annotating
+    filters = {}
+    if q:
+        filters = {
+            "$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}],
+            "create_by": user.id,
+        }
+
+    db_data = await paginated_find(model.Item, filters, current, page_size, sort)
+
+    return ResponseModel(success=True, data=db_data)
+
+
+@router.post("/user-item/query/", response_model=ResponseModel)
+async def query_user_items(
+    filters: dict = Body(default=None, example={"name": "string"}, description="query"),
+    page_size: int = Query(example=10, description=""),
+    current: int = Query(example=1, description=""),
+    sort: str = Query(
+        default="create_time",
+        example="'id':-1",
+        description="1:asc, -1:desc, default desc, _id = create_time desc",
+    ),
+    user: User = Depends(current_active_user),
+):
+    """
+    post filters for query then paged
+    """
+    # annotating
+    filters = {**filters, "create_by": user.id}
+    db_data = await paginated_find(model.Item, filters, current, page_size, sort)
+    return ResponseModel(success=True, data=db_data)

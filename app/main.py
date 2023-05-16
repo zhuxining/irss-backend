@@ -30,12 +30,12 @@ logger = logging.getLogger(__name__)
 #     return JSONResponse(response, status_code=500)
 
 
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
-    )
+# @app.exception_handler(RequestValidationError)
+# async def validation_exception_handler(request: Request, exc: RequestValidationError):
+#     return JSONResponse(
+#         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+#         content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
+#     )
 
 
 app.include_router(api_router, prefix=settings.api_prefix)
