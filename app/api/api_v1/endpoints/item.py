@@ -1,13 +1,16 @@
+import json
+from datetime import datetime
 from typing import Annotated
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, Depends, Query
+from pydantic import Json
 
 from app.crud.users import current_active_user
 from app.items_example import crud, model, schema
 from app.models.users import User
-from app.utils.tools_func import paginated_find
 from app.utils.response_model import ResponseModel
+from app.utils.tools_func import paginated_find
 
 router = APIRouter()
 
@@ -22,38 +25,39 @@ async def create_item(item: schema.ItemCreate):
     return ResponseModel(success=True, data=db_data)
 
 
-@router.get("/items/", response_model=ResponseModel)
+@router.get("/items", response_model=ResponseModel)
 async def list_items(
-    q: Annotated[str | None, Query(max_length=50)] = None,
-    page_size: int = 10,
-    current: int = 1,
-    sort: str = "_id",
+    _id: PydanticObjectId = Query(default=None),
+    name: str = Query(default=None, max_length=50, description="fuzzy"),
+    description: str = Query(default=None, max_length=50, description="fuzzy"),
+    range_create_time: Json = Query(default=None, description=""),
+    page_size: int = Query(default=10, description=""),
+    current: int = Query(default=1, description=""),
+    sort: str = Query(
+        default="_id", description="default desc, _id = create_item desc"
+    ),
 ):
     """
-    get by fuzzy query then paged
+    get list by filters then paged
     """
     # annotating
+    # range_create_time = json.loads(range_create_time)
+    start = datetime.fromisoformat(range_create_time["start"])
+    end = datetime.fromisoformat(range_create_time["end"])
     filters = {}
-    if q:
-        filters = {"$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}]}
-
+    if _id:
+        filters["_id"] = _id
+    if name:
+        filters["name"] = {"$regex": name}
+    if description:
+        filters["description"] = {"$regex": description}
+    if range_create_time:
+        filters["range_create_time"] = {
+            "$gte": start,
+            "$lte": end,
+        }
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
 
-    return ResponseModel(success=True, data=db_data)
-
-
-@router.post("/item/search/", response_model=ResponseModel)
-async def search_items(
-    filters: dict = Body(example={"query key": "query value"}, title="query"),
-    page_size: int = 10,
-    current: int = 1,
-    sort: str = "_id",
-):
-    """
-    post filters for search then paged
-    """
-    # annotating
-    db_data = await paginated_find(model.Item, filters, current, page_size, sort)
     return ResponseModel(success=True, data=db_data)
 
 
@@ -85,6 +89,45 @@ async def delete_item(item_id: PydanticObjectId):
     # annotating
     await crud.delete_item(item_id)
     return ResponseModel(success=True, data={})
+
+
+@router.get("/items/search/", response_model=ResponseModel)
+async def search_items(
+    q: str = Query(max_length=50, default=None, description="fuzzy:name、description"),
+    page_size: int = Query(default=10, description=""),
+    current: int = Query(default=1, description=""),
+    sort: str = Query(
+        default="_id", description="default desc, _id = create_item desc"
+    ),
+):
+    """
+    get by fuzzy query then paged
+    """
+    # annotating
+    filters = {}
+    if q:
+        filters = {"$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}]}
+
+    db_data = await paginated_find(model.Item, filters, current, page_size, sort)
+
+    return ResponseModel(success=True, data=db_data)
+
+
+@router.post("/item/query/", response_model=ResponseModel)
+async def query_items(
+    filters: dict = Body(example={"query key": "query value"}, description="query"),
+    page_size: int = Query(default=10, description=""),
+    current: int = Query(default=1, description=""),
+    sort: str = Query(
+        default="_id", description="default desc, _id = create_item desc"
+    ),
+):
+    """
+    post filters for query then paged
+    """
+    # annotating
+    db_data = await paginated_find(model.Item, filters, current, page_size, sort)
+    return ResponseModel(success=True, data=db_data)
 
 
 @router.post("/user_item", response_model=ResponseModel)
