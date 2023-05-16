@@ -22,7 +22,7 @@ async def create_item(item: schema.ItemCreate):
     return ResponseModel(success=True, data=db_data)
 
 
-@router.get("/item/", response_model=ResponseModel)
+@router.get("/items/", response_model=ResponseModel)
 async def list_items(
     q: Annotated[str | None, Query(max_length=50)] = None,
     page_size: int = 10,
@@ -99,7 +99,7 @@ async def create_user_item(
     return ResponseModel(success=True, data=db_data)
 
 
-@router.get("/user_item/", response_model=ResponseModel)
+@router.get("/user_items/", response_model=ResponseModel)
 async def list_user_items(
     q: Annotated[str | None, Query(max_length=50)] = None,
     page_size: int = 10,
