@@ -16,10 +16,10 @@ class Item(Document):
     tax: float | None = None
     tags: set[str] = set()
     image: list | None = None
-    created_by: PydanticObjectId | None
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_by: PydanticObjectId | None = None
-    updated_at: datetime | None = None
+    create_by: PydanticObjectId | None
+    create_time: datetime = Field(default_factory=datetime.utcnow)
+    update_by: PydanticObjectId | None = None
+    update_time: datetime | None = None
 
     class Settings:
         name = "item"

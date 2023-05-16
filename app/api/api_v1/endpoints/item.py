@@ -6,7 +6,7 @@ from fastapi import APIRouter, Body, Depends, Query
 from app.crud.users import current_active_user
 from app.items_example import crud, model, schema
 from app.models.users import User
-from app.utils.paged import paginated_find
+from app.utils.tools_func import paginated_find
 from app.utils.response_model import ResponseModel
 
 router = APIRouter()
@@ -23,7 +23,7 @@ async def create_item(item: schema.ItemCreate):
 
 
 @router.get("/item/", response_model=ResponseModel)
-async def get_items(
+async def list_items(
     q: Annotated[str | None, Query(max_length=50)] = None,
     page_size: int = 10,
     current: int = 1,
@@ -100,7 +100,7 @@ async def create_user_item(
 
 
 @router.get("/user_item/", response_model=ResponseModel)
-async def get_user_items(
+async def list_user_items(
     q: Annotated[str | None, Query(max_length=50)] = None,
     page_size: int = 10,
     current: int = 1,
@@ -115,10 +115,10 @@ async def get_user_items(
     if q:
         filters = {
             "$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}],
-            "created_by": user.id,
+            "create_by": user.id,
         }
     else:
-        filters = {"created_by": user.id}
+        filters = {"create_by": user.id}
 
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
 
@@ -137,7 +137,7 @@ async def search_user_items(
     post filters for search then paged
     """
     # annotating
-    filters = {**filters, "created_by": user.id}
+    filters = {**filters, "create_by": user.id}
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
     return ResponseModel(success=True, data=db_data)
 
