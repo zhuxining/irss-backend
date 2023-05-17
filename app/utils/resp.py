@@ -46,16 +46,26 @@ class Resp(object):
         return self
 
 
-OK: Resp = Resp("0000", "ok", status.HTTP_200_OK, 0)
-InvalidRequest: Resp = Resp("1000", "无效的请求", status.HTTP_400_BAD_REQUEST, 1)
-InvalidParams: Resp = Resp("1002", "无效的参数", status.HTTP_400_BAD_REQUEST, 1)
-BusinessError: Resp = Resp("1003", "业务错误", status.HTTP_400_BAD_REQUEST, 1)
-DataNotFound: Resp = Resp("1004", "查询失败", status.HTTP_400_BAD_REQUEST, 1)
-DataStoreFail: Resp = Resp("1005", "新增失败", status.HTTP_400_BAD_REQUEST, 1)
-DataUpdateFail: Resp = Resp("1006", "更新失败", status.HTTP_400_BAD_REQUEST, 1)
-DataDestroyFail: Resp = Resp("1007", "删除失败", status.HTTP_400_BAD_REQUEST, 1)
-PermissionDenied: Resp = Resp("1008", "权限拒绝", status.HTTP_403_FORBIDDEN, 1)
-ServerError: Resp = Resp("5000", "服务器繁忙", status.HTTP_500_INTERNAL_SERVER_ERROR, 1)
+Ok: Resp = Resp("0000", "Ok", status.HTTP_200_OK, 0)
+
+InvalidRequest: Resp = Resp("4000", "无效请求", status.HTTP_400_BAD_REQUEST, 1)
+ValidationError: Resp = Resp("4022", "参数验证错误", status.HTTP_422_UNPROCESSABLE_ENTITY, 1)
+UnAthenticated: Resp = Resp("4001", "未验证身份", status.HTTP_401_UNAUTHORIZED, 1)
+PermissionDenied: Resp = Resp("4003", "权限不足", status.HTTP_403_FORBIDDEN, 1)
+AlreadyExists: Resp = Resp("4009", "已存在", status.HTTP_409_CONFLICT, 1)
+ResourceExhausted: Resp = Resp("4029", "超出配额限制", status.HTTP_429_TOO_MANY_REQUESTS, 1)
+
+ServerError: Resp = Resp("5000", "服务器开小差了", status.HTTP_500_INTERNAL_SERVER_ERROR, 1)
+BadGateway: Resp = Resp("5002", "网关错误", status.HTTP_502_BAD_GATEWAY, 1)
+ServiceUnavailable: Resp = Resp("5003", "服务器繁忙", status.HTTP_503_SERVICE_UNAVAILABLE, 1)
+GatewayTimeout: Resp = Resp("5004", "网关超时", status.HTTP_504_GATEWAY_TIMEOUT, 1)
+SqlFail: Resp = Resp("5100", "数据库执行失败", status.HTTP_500_INTERNAL_SERVER_ERROR, 1)
+
+BusinessError: Resp = Resp("1000", "业务错误", status.HTTP_400_BAD_REQUEST, 1)
+DataNotFound: Resp = Resp("1001", "未查询到", status.HTTP_400_BAD_REQUEST, 1)
+DataStoreFail: Resp = Resp("1002", "新增失败", status.HTTP_400_BAD_REQUEST, 1)
+DataUpdateFail: Resp = Resp("1003", "更新失败", status.HTTP_400_BAD_REQUEST, 1)
+DataDestroyFail: Resp = Resp("1004", "删除失败", status.HTTP_400_BAD_REQUEST, 1)
 
 
 def result(resp: Resp, data: Any = {}, error_detail: Any = None) -> Response:

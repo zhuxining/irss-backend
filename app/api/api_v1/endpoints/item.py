@@ -15,12 +15,12 @@ router = APIRouter()
 
 @router.get("/table/list", response_model=list[schema.ItemBase])
 async def get_table_list():
-    return resp.result(resp.OK)
+    return resp.result(resp.Ok)
 
 
 @router.get("/table/list-fail")
 async def get_table_list_fail():
-    return resp.result(resp.InvalidParams)
+    return resp.result(resp.ValidationError)
 
 
 @router.post("/item", response_model=schema.Item)
@@ -33,7 +33,7 @@ async def create_item(item: schema.ItemCreate):
     db_item.create_time = datetime.utcnow()
     db_data = await model.Item.insert_one(db_item)
     # db_data = await crud.create_item(item)
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.get("/items", response_model=list[schema.Item])
@@ -88,7 +88,7 @@ async def list_items(
         }
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
 
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.get("/item/{item_id}/", response_model=schema.Item)
@@ -100,7 +100,7 @@ async def get_item(item_id: PydanticObjectId):
     db_data = await model.Item.find_one({"_id": item_id})
     if db_data is None:
         return resp.result(resp.DataNotFound)
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.put("/item/{item_id}/", response_model=schema.Item)
@@ -112,7 +112,7 @@ async def update_item(item_id: PydanticObjectId, item: schema.ItemUpdate):
     db_data = await model.Item.find_one({"_id": item_id}).update_one(
         {"$set": {**item.dict(), "update_time": datetime.utcnow()}}
     )
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.delete("/item/{item_id}/", response_model={})
@@ -122,7 +122,7 @@ async def delete_item(item_id: PydanticObjectId):
     """
     # annotating
     await model.Item.find_one({"_id": item_id}).delete()
-    return resp.result(resp.OK, data={})
+    return resp.result(resp.Ok, data={})
 
 
 @router.get("/items/search/", response_model=list[schema.Item])
@@ -146,7 +146,7 @@ async def search_items(
 
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
 
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.post("/item/query/", response_model=list[schema.Item])
@@ -165,7 +165,7 @@ async def query_items(
     """
     # annotating
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.post("/user-item", response_model=schema.Item)
@@ -180,7 +180,7 @@ async def create_user_item(
     db_item.create_by = user.id
     db_item.create_time = datetime.utcnow()
     db_data = await model.Item.insert_one(db_item)
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.get("/user-items/", response_model=schema.Item)
@@ -236,7 +236,7 @@ async def list_user_items(
         }
     filters = {**filters, "create_by": user.id}
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.get("/user-item/{item_id}/", response_model=schema.Item)
@@ -248,7 +248,7 @@ async def get_user_item(
     """
     # annotating
     db_data = await model.Item.find_one({"create_by": user.id, "_id": item_id})
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.put("/user-item/{item_id}/", response_model=schema.Item)
@@ -270,7 +270,7 @@ async def update_user_item(
             }
         }
     )
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.delete("/user-item/{item_id}/", response_model={})
@@ -283,7 +283,7 @@ async def delete_user_item(
     """
     # annotating
     await model.Item.find_one({"_id": item_id, "create_by": user.id}).delete()
-    return resp.result(resp.OK, data={})
+    return resp.result(resp.Ok, data={})
 
 
 @router.get("/user-items/search/", response_model=list[schema.Item])
@@ -311,7 +311,7 @@ async def search_user_items(
 
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
 
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.post("/user-item/query/", response_model=list[schema.Item])
@@ -332,4 +332,4 @@ async def query_user_items(
     # annotating
     filters = {**filters, "create_by": user.id}
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
-    return resp.result(resp.OK, data=db_data)
+    return resp.result(resp.Ok, data=db_data)

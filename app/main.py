@@ -32,7 +32,7 @@ async def request_validation_exception_handler(
         f"\nMethod:{request.method} URL:{request.url}\nHeaders:{request.headers}\n{traceback.format_exc()}"
     )
     # （Pydantic's ValidationError） RequestValidationError
-    return resp.result(resp.InvalidParams, error_detail=exc.errors())
+    return resp.result(resp.ValidationError, error_detail=exc.errors())
 
 
 @app.exception_handler(PyMongoError)
@@ -41,7 +41,7 @@ async def handle_pymongo_error(request, exc):
         f"\nMethod:{request.method} URL:{request.url}\nHeaders:{request.headers}\n{traceback.format_exc()}"
     )
     # PyMongoError
-    return resp.result(resp.InvalidParams, error_detail=exc)
+    return resp.result(resp.SqlFail, error_detail=exc)
 
 
 @app.middleware("http")
