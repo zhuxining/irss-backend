@@ -1,4 +1,5 @@
 import socket
+
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -30,18 +31,18 @@ from app.extensions.logger import logger
 class Resp(object):
     def __init__(
         self,
-        errorCode: str,
-        errorMessage: str,
+        error_code: str,
+        error_message: str,
         http_status: int,
-        showType: int,
+        show_type: int,
     ):
-        self.errorCode = errorCode
-        self.errorMessage = errorMessage
+        self.error_code = error_code
+        self.error_message = error_message
         self.http_status = http_status
-        self.showType = showType
+        self.show_type = show_type
 
-    def set_msg(self, errorMessage):
-        self.errorMessage = errorMessage
+    def set_msg(self, error_message):
+        self.error_message = error_message
         return self
 
 
@@ -57,20 +58,18 @@ PermissionDenied: Resp = Resp("1008", "权限拒绝", status.HTTP_403_FORBIDDEN,
 ServerError: Resp = Resp("5000", "服务器繁忙", status.HTTP_500_INTERNAL_SERVER_ERROR, 1)
 
 
-def result(
-    resp: Resp,
-    data: Any = {},
-) -> Response:
-    traceId = uuid4()
+def result(resp: Resp, data: Any = {}, error_detail: Any = None) -> Response:
+    trace_id = uuid4()
     host = socket.gethostbyname(socket.gethostname())
+
     # host = socket.gethostname()
     if 400 <= resp.http_status < 500:
         logger.warning(
-            f"status_code:{resp.http_status},errorCode:{resp.errorCode},errorMessage:{resp.errorMessage},traceId:{traceId},host:{host}"
+            f"status_code:{resp.http_status},errorCode:{resp.error_code},errorMessage:{resp.error_message},traceId:{trace_id},host:{host}"
         )
     if 500 <= resp.http_status < 600:
         logger.error(
-            f"status_code:{resp.http_status},errorCode:{resp.errorCode},errorMessage:{resp.errorMessage},traceId:{traceId},host:{host}"
+            f"status_code:{resp.http_status},errorCode:{resp.error_code},errorMessage:{resp.error_message},traceId:{trace_id},host:{host}"
         )
     return JSONResponse(
         status_code=resp.http_status,
@@ -78,11 +77,12 @@ def result(
             {
                 "success": resp.http_status == 200,
                 "data": data,
-                "errorCode": resp.errorCode,
-                "errorMessage": resp.errorMessage,
-                "showType": resp.showType,
-                "traceId": traceId,
+                "errorCode": resp.error_code,
+                "errorMessage": resp.error_message,
+                "showType": resp.show_type,
+                "traceId": trace_id,
                 "host": host,
+                "errorDetail": error_detail,
             }
         ),
     )
