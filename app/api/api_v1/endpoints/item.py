@@ -1,10 +1,11 @@
-import json
-from datetime import datetime
+from datetime import date, datetime
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, Depends, Query
 from pydantic import Json
 
+# from app.api.resp import Resp, fail
+from app.api import resp
 from app.crud.users import current_active_user
 from app.items_example import crud, model, schema
 from app.models.users import User
@@ -14,14 +15,24 @@ from app.utils.tools_func import paginated_find
 router = APIRouter()
 
 
-@router.post("/item", response_model=ResponseModel)
+@router.get("/table/list", response_model=list[schema.ItemBase])
+async def get_table_list():
+    return resp.result(resp.OK)
+
+
+@router.get("/table/list-fail")
+async def get_table_list_fail():
+    return resp.result(resp.InvalidParams)
+
+
+@router.post("/item", response_model=schema.Item)
 async def create_item(item: schema.ItemCreate):
     """
     create a new
     """
     # annotating
     db_data = await crud.create_item(item)
-    return ResponseModel(success=True, data=db_data)
+    return resp.result(resp.OK, data=db_data)
 
 
 @router.get("/items", response_model=ResponseModel)
