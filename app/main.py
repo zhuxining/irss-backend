@@ -1,4 +1,4 @@
-import logging
+import traceback
 
 from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
@@ -6,6 +6,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pymongo.errors import PyMongoError
 
+from app.extensions.logger import logger
 from app.utils.response_model import ResponseModel
 
 from .api.api_v1.api import api_router
@@ -20,8 +21,6 @@ app = FastAPI(
     version=settings.app_version,
     openapi_url=f"{settings.api_prefix}/openapi.json",
 )
-
-logger = logging.getLogger(__name__)
 
 
 # async def handle_pymongo_error(request, exc):

@@ -107,7 +107,7 @@ async def update_item(item_id: PydanticObjectId, item: schema.ItemUpdate):
     """
     # annotating
     db_data = await crud.update_item(item_id, item)
-    return ResponseModel(success=True, data=db_data)
+    resp.result(resp.OK, data=db_data)
 
 
 @router.delete("/item/{item_id}/", response_model=ResponseModel)

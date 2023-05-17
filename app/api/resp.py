@@ -6,6 +6,8 @@ from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 
+from app.extensions.logger import logger
+
 # export interface response {
 #   success: boolean; // if request is success
 #   data?: any; // response data
@@ -58,10 +60,18 @@ ServerError: Resp = Resp("5000", "服务器繁忙", status.HTTP_500_INTERNAL_SER
 def result(
     resp: Resp,
     data: Any = {},
-    traceId: UUID = uuid4(),
-    # host: str = socket.gethostbyname(socket.gethostname()),
-    host: str = socket.gethostname(),
 ) -> Response:
+    traceId = uuid4()
+    host = socket.gethostbyname(socket.gethostname())
+    # host = socket.gethostname()
+    if 400 <= resp.http_status < 500:
+        logger.warning(
+            f"status_code:{resp.http_status},errorCode:{resp.errorCode},errorMessage:{resp.errorMessage},traceId:{traceId},host:{host}"
+        )
+    if 500 <= resp.http_status < 600:
+        logger.error(
+            f"status_code:{resp.http_status},errorCode:{resp.errorCode},errorMessage:{resp.errorMessage},traceId:{traceId},host:{host}"
+        )
     return JSONResponse(
         status_code=resp.http_status,
         content=jsonable_encoder(
