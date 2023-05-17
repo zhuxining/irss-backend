@@ -1,15 +1,13 @@
-from datetime import date, datetime
+from datetime import datetime
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, Depends, Query
 from pydantic import Json
 
-# from app.api.resp import Resp, fail
-from app.api import resp
 from app.crud.users import current_active_user
 from app.items_example import crud, model, schema
 from app.models.users import User
-from app.utils.response_model import ResponseModel
+from app.utils import resp
 from app.utils.tools_func import paginated_find
 
 router = APIRouter()
@@ -35,7 +33,7 @@ async def create_item(item: schema.ItemCreate):
     return resp.result(resp.OK, data=db_data)
 
 
-@router.get("/items", response_model=ResponseModel)
+@router.get("/items", response_model=list[schema.Item])
 async def list_items(
     id: str = Query(default=None, description="mongodb ObjectId"),
     name: str = Query(default=None, max_length=50, description="fuzzy"),
@@ -87,40 +85,40 @@ async def list_items(
         }
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
 
-    return ResponseModel(success=True, data=db_data)
+    return resp.result(resp.OK, data=db_data)
 
 
-@router.get("/item/{item_id}/", response_model=ResponseModel)
+@router.get("/item/{item_id}/", response_model=schema.Item)
 async def get_item(item_id: PydanticObjectId):
     """
     get by id
     """
     # annotating
     db_data = await crud.get_item(item_id)
-    return ResponseModel(success=True, data=db_data)
+    return resp.result(resp.OK, data=db_data)
 
 
-@router.put("/item/{item_id}/", response_model=ResponseModel)
+@router.put("/item/{item_id}/", response_model=schema.Item)
 async def update_item(item_id: PydanticObjectId, item: schema.ItemUpdate):
     """
     put by id
     """
     # annotating
     db_data = await crud.update_item(item_id, item)
-    resp.result(resp.OK, data=db_data)
+    return resp.result(resp.OK, data=db_data)
 
 
-@router.delete("/item/{item_id}/", response_model=ResponseModel)
+@router.delete("/item/{item_id}/", response_model={})
 async def delete_item(item_id: PydanticObjectId):
     """
     delete by id
     """
     # annotating
     await crud.delete_item(item_id)
-    return ResponseModel(success=True, data={})
+    return resp.result(resp.OK, data={})
 
 
-@router.get("/items/search/", response_model=ResponseModel)
+@router.get("/items/search/", response_model=list[schema.Item])
 async def search_items(
     q: str = Query(default=None, max_length=50, description="fuzzy:name、description"),
     page_size: int = Query(example=10, description=""),
@@ -141,10 +139,10 @@ async def search_items(
 
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
 
-    return ResponseModel(success=True, data=db_data)
+    return resp.result(resp.OK, data=db_data)
 
 
-@router.post("/item/query/", response_model=ResponseModel)
+@router.post("/item/query/", response_model=list[schema.Item])
 async def query_items(
     filters: dict = Body(default=None, example={"name": "string"}, description="query"),
     page_size: int = Query(example=10, description=""),
@@ -160,10 +158,10 @@ async def query_items(
     """
     # annotating
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
-    return ResponseModel(success=True, data=db_data)
+    return resp.result(resp.OK, data=db_data)
 
 
-@router.post("/user-item", response_model=ResponseModel)
+@router.post("/user-item", response_model=schema.Item)
 async def create_user_item(
     item: schema.ItemCreate, user: User = Depends(current_active_user)
 ):
@@ -172,10 +170,10 @@ async def create_user_item(
     """
     # annotating
     db_data = await crud.create_user_item(item, user.id)
-    return ResponseModel(success=True, data=db_data)
+    return resp.result(resp.OK, data=db_data)
 
 
-@router.get("/user-items/", response_model=ResponseModel)
+@router.get("/user-items/", response_model=schema.Item)
 async def list_user_items(
     id: str = Query(default=None, description="mongodb ObjectId"),
     name: str = Query(default=None, max_length=50, description="fuzzy"),
@@ -228,10 +226,10 @@ async def list_user_items(
         }
     filters = {**filters, "create_by": user.id}
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
-    return ResponseModel(success=True, data=db_data)
+    return resp.result(resp.OK, data=db_data)
 
 
-@router.get("/user-item/{item_id}/", response_model=ResponseModel)
+@router.get("/user-item/{item_id}/", response_model=schema.Item)
 async def get_user_item(
     item_id: PydanticObjectId, user: User = Depends(current_active_user)
 ):
@@ -240,10 +238,10 @@ async def get_user_item(
     """
     # annotating
     db_data = await crud.get_user_item(item_id, user.id)
-    return ResponseModel(success=True, data=db_data)
+    return resp.result(resp.OK, data=db_data)
 
 
-@router.put("/user-item/{item_id}/", response_model=ResponseModel)
+@router.put("/user-item/{item_id}/", response_model=schema.Item)
 async def update_user_item(
     item_id: PydanticObjectId,
     item: schema.ItemUpdate,
@@ -254,10 +252,10 @@ async def update_user_item(
     """
     # annotating
     db_data = await crud.update_user_item(item_id, item, user.id)
-    return ResponseModel(success=True, data=db_data)
+    return resp.result(resp.OK, data=db_data)
 
 
-@router.delete("/user-item/{item_id}/", response_model=ResponseModel)
+@router.delete("/user-item/{item_id}/", response_model={})
 async def delete_user_item(
     item_id: PydanticObjectId,
     user: User = Depends(current_active_user),
@@ -267,10 +265,10 @@ async def delete_user_item(
     """
     # annotating
     await crud.delete_user_item(item_id, user.id)
-    return ResponseModel(success=True, data={})
+    return resp.result(resp.OK, data={})
 
 
-@router.get("/user-items/search/", response_model=ResponseModel)
+@router.get("/user-items/search/", response_model=list[schema.Item])
 async def search_user_items(
     q: str = Query(default=None, max_length=50, description="fuzzy:name、description"),
     page_size: int = Query(example=10, description=""),
@@ -295,10 +293,10 @@ async def search_user_items(
 
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
 
-    return ResponseModel(success=True, data=db_data)
+    return resp.result(resp.OK, data=db_data)
 
 
-@router.post("/user-item/query/", response_model=ResponseModel)
+@router.post("/user-item/query/", response_model=list[schema.Item])
 async def query_user_items(
     filters: dict = Body(default=None, example={"name": "string"}, description="query"),
     page_size: int = Query(example=10, description=""),
@@ -316,4 +314,4 @@ async def query_user_items(
     # annotating
     filters = {**filters, "create_by": user.id}
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
-    return ResponseModel(success=True, data=db_data)
+    return resp.result(resp.OK, data=db_data)
