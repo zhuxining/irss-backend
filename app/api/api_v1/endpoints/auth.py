@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 
-from app.crud.users import (
+from app.core.users import (
     SECRET,
     auth_backend,
     current_active_user,

@@ -4,7 +4,7 @@ from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, Depends, Query
 from pydantic import Json
 
-from app.crud.users import current_active_user
+from app.core.users import current_active_user
 from app.items_example import crud, model, schema
 from app.models.users import User
 from app.utils import resp
