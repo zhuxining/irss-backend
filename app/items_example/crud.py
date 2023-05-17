@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from beanie import PydanticObjectId
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 
 from app.items_example import model, schema
 
@@ -21,7 +21,9 @@ async def get_items() -> list[model.Item]:
 async def get_item(item_id: PydanticObjectId) -> model.Item:
     db_item = await model.Item.find_one({"_id": item_id})
     if db_item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Item not found"
+        )
     return db_item
 
 
@@ -59,7 +61,9 @@ async def get_user_item(
 ) -> model.Item:
     db_item = await model.Item.find_one({"create_by": user_id, "_id": item_id})
     if db_item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Item not found"
+        )
     return db_item
 
 

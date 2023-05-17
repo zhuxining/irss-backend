@@ -29,7 +29,10 @@ async def create_item(item: schema.ItemCreate):
     create a new
     """
     # annotating
-    db_data = await crud.create_item(item)
+    db_item = model.Item(**item.dict())
+    db_item.create_time = datetime.utcnow()
+    db_data = await model.Item.insert_one(db_item)
+    # db_data = await crud.create_item(item)
     return resp.result(resp.OK, data=db_data)
 
 
@@ -94,7 +97,9 @@ async def get_item(item_id: PydanticObjectId):
     get by id
     """
     # annotating
-    db_data = await crud.get_item(item_id)
+    db_data = await model.Item.find_one({"_id": item_id})
+    if db_data is None:
+        return resp.result(resp.DataNotFound)
     return resp.result(resp.OK, data=db_data)
 
 
@@ -104,7 +109,9 @@ async def update_item(item_id: PydanticObjectId, item: schema.ItemUpdate):
     put by id
     """
     # annotating
-    db_data = await crud.update_item(item_id, item)
+    db_data = await model.Item.find_one({"_id": item_id}).update_one(
+        {"$set": {**item.dict(), "update_time": datetime.utcnow()}}
+    )
     return resp.result(resp.OK, data=db_data)
 
 
@@ -114,7 +121,7 @@ async def delete_item(item_id: PydanticObjectId):
     delete by id
     """
     # annotating
-    await crud.delete_item(item_id)
+    await model.Item.find_one({"_id": item_id}).delete()
     return resp.result(resp.OK, data={})
 
 
@@ -169,7 +176,10 @@ async def create_user_item(
     create a new
     """
     # annotating
-    db_data = await crud.create_user_item(item, user.id)
+    db_item = model.Item(**item.dict())
+    db_item.create_by = user.id
+    db_item.create_time = datetime.utcnow()
+    db_data = await model.Item.insert_one(db_item)
     return resp.result(resp.OK, data=db_data)
 
 
@@ -237,7 +247,7 @@ async def get_user_item(
     get by id and current_user
     """
     # annotating
-    db_data = await crud.get_user_item(item_id, user.id)
+    db_data = await model.Item.find_one({"create_by": user.id, "_id": item_id})
     return resp.result(resp.OK, data=db_data)
 
 
@@ -251,7 +261,15 @@ async def update_user_item(
     put by id
     """
     # annotating
-    db_data = await crud.update_user_item(item_id, item, user.id)
+    db_data = await model.Item.find_one({"_id": item_id}).update_one(
+        {
+            "$set": {
+                **item.dict(),
+                "update_by": user.id,
+                "update_time": datetime.utcnow(),
+            }
+        }
+    )
     return resp.result(resp.OK, data=db_data)
 
 
@@ -264,7 +282,7 @@ async def delete_user_item(
     delete by id
     """
     # annotating
-    await crud.delete_user_item(item_id, user.id)
+    await model.Item.find_one({"_id": item_id, "create_by": user.id}).delete()
     return resp.result(resp.OK, data={})
 
 
