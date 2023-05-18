@@ -7,7 +7,7 @@ async def paginated_find(
     current: int = 1,
     page_size: int = 10,
     sort: str = "_id",
-):
+) -> dict:
     total = await model.find(query).count()
     results = (
         await model.find(query)

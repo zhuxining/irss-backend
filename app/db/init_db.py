@@ -7,7 +7,7 @@ from app.models.users import User
 from .database import db
 
 
-async def init_db():
+async def init_db() -> None:
     await init_beanie(
         database=db,
         document_models=[

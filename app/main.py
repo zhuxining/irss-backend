@@ -18,10 +18,11 @@ from app.config import settings
 from app.db.init_db import init_db
 from app.utils import resp
 
+
 # from app.extensions.exc_handler import log_requests
 
 app = FastAPI(
-    debug=True,
+    debug=False,
     title=settings.app_name,
     description=settings.app_description,
     version=settings.app_version,

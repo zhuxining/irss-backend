@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 @router.get("/table/list", response_model=list[schema.ItemBase])
-async def get_table_list():
+async def get_table_list() -> Response:
     return resp.result(resp.Ok)
 
 
@@ -25,7 +25,7 @@ async def get_table_list_fail() -> Response:
 
 
 @router.post("/item", response_model=schema.Item)
-async def create_item(item: schema.ItemCreate):
+async def create_item(item: schema.ItemCreate) -> Response:
     """
     Create a new item.
     """
@@ -64,7 +64,7 @@ async def list_items(
         example="'id':-1",
         description="1:asc, -1:desc, default desc, _id = create_time desc",
     ),
-):
+) -> Response:
     """
     Get a list of items by filters and pagination.
     """
@@ -97,7 +97,7 @@ async def list_items(
 
 
 @router.get("/item/{item_id}/", response_model=schema.Item)
-async def get_item(item_id: PydanticObjectId):
+async def get_item(item_id: PydanticObjectId) -> Response:
     """
     Get an item by ID.
     """
@@ -110,7 +110,7 @@ async def get_item(item_id: PydanticObjectId):
 
 
 @router.put("/item/{item_id}/", response_model=schema.Item)
-async def update_item(item_id: PydanticObjectId, item: schema.ItemUpdate):
+async def update_item(item_id: PydanticObjectId, item: schema.ItemUpdate) -> Response:
     """
     Update an item by ID.
     """
@@ -122,7 +122,7 @@ async def update_item(item_id: PydanticObjectId, item: schema.ItemUpdate):
 
 
 @router.delete("/item/{item_id}/", response_model={})
-async def delete_item(item_id: PydanticObjectId):
+async def delete_item(item_id: PydanticObjectId) -> Response:
     """
     delete by id
     """
@@ -141,7 +141,7 @@ async def search_items(
         example="'id':-1",
         description="1:asc, -1:desc, default desc, _id = create_time desc",
     ),
-):
+) -> Response:
     """
     get by fuzzy query then paged
     """
@@ -165,7 +165,7 @@ async def query_items(
         example="'id':-1",
         description="1:asc, -1:desc, default desc, _id = create_time desc",
     ),
-):
+) -> Response:
     """
     post filters for query then paged
     """
@@ -177,7 +177,7 @@ async def query_items(
 @router.post("/user-item", response_model=schema.Item)
 async def create_user_item(
     item: schema.ItemCreate, user: User = Depends(current_active_user)
-):
+) -> Response:
     """
     create a new
     """
@@ -215,7 +215,7 @@ async def list_user_items(
         description="1:asc, -1:desc, default desc, _id = create_time desc",
     ),
     user: User = Depends(current_active_user),
-):
+) -> Response:
     """
     get list by filters and current_active_user then paged
     """
@@ -248,7 +248,7 @@ async def list_user_items(
 @router.get("/user-item/{item_id}/", response_model=schema.Item)
 async def get_user_item(
     item_id: PydanticObjectId, user: User = Depends(current_active_user)
-):
+) -> Response:
     """
     get by id and current_user
     """
@@ -262,7 +262,7 @@ async def update_user_item(
     item_id: PydanticObjectId,
     item: schema.ItemUpdate,
     user: User = Depends(current_active_user),
-):
+) -> Response:
     """
     put by id
     """
@@ -283,7 +283,7 @@ async def update_user_item(
 async def delete_user_item(
     item_id: PydanticObjectId,
     user: User = Depends(current_active_user),
-):
+) -> Response:
     """
     delete by id
     """
@@ -303,7 +303,7 @@ async def search_user_items(
         description="1:asc, -1:desc, default desc, _id = create_time desc",
     ),
     user: User = Depends(current_active_user),
-):
+) -> Response:
     """
     get by fuzzy query then paged
     """
@@ -331,7 +331,7 @@ async def query_user_items(
         description="1:asc, -1:desc, default desc, _id = create_time desc",
     ),
     user: User = Depends(current_active_user),
-):
+) -> Response:
     """
     post filters for query then paged
     """
