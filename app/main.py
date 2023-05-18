@@ -18,7 +18,6 @@ from app.config import settings
 from app.db.init_db import init_db
 from app.utils import resp
 
-
 # from app.extensions.exc_handler import log_requests
 
 app = FastAPI(
@@ -49,6 +48,20 @@ app.add_middleware(
 )
 
 
+# Define a middleware function to log incoming requests and outgoing responses.
+@app.middleware("http")
+async def log_requests(request: Request, call_next) -> str:
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    if response.status_code != 200:
+        logger.warning(
+            f"\nMethod:{request.method}\nURL:{request.url}\nHeaders:{request.headers}\nProcessTime:{process_time}\n{traceback.format_exc()}"
+        )
+    return response
+
+
 # Define exception handlers for RequestValidationError and PyMongoError.
 @app.exception_handler(RequestValidationError)
 async def request_validation_exception_handler(
@@ -66,22 +79,7 @@ async def handle_pymongo_error(request, exc):
     logger.warning(
         f"\nMethod:{request.method} URL:{request.url}\nHeaders:{request.headers}\n{traceback.format_exc()}"
     )
-
     return resp.result(resp.SqlFail, error_detail=exc)
-
-
-# Define a middleware function to log incoming requests and outgoing responses.
-@app.middleware("http")
-async def log_requests(request: Request, call_next) -> str:
-    start_time = time.time()
-    response = await call_next(request)
-    process_time = time.time() - start_time
-    response.headers["X-Process-Time"] = str(process_time)
-    logger.info(
-        f"\nMethod:{request.method}\nURL:{request.url}\nHeaders:{request.headers}\nProcessTime:{process_time}\n{traceback.format_exc()}"
-    )
-
-    return response
 
 
 # Define a root endpoint that returns a JSON response with a message.

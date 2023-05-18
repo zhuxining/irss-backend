@@ -47,7 +47,7 @@ dependencies = [
     "loguru>=0.7.0",
 ]
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = {text = "MulanPSL2"}
 
 [build-system]
 requires = ["pdm-backend"]
