@@ -15,6 +15,13 @@ class Settings(BaseSettings):
 
     db_url: str = "mongodb://irss-test%40wr:%5EXEwJ85TG8E%40@8.219.156.181:27017/?authSource=irss-test&readPreference=primary&ssl=false&directConnection=true"
 
+    cors_origins = [
+        "http://localhost.tiangolo.com",
+        "https://localhost.tiangolo.com",
+        "http://localhost",
+        "http://localhost:8080",
+    ]
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

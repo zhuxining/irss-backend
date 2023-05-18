@@ -2,6 +2,7 @@ from datetime import datetime
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, Depends, Query
+from fastapi.responses import JSONResponse, Response
 from pydantic import Json
 
 from app.core.users import current_active_user
@@ -19,7 +20,7 @@ async def get_table_list():
 
 
 @router.get("/table/list-fail")
-async def get_table_list_fail():
+async def get_table_list_fail() -> Response:
     return resp.result(resp.ValidationError)
 
 
