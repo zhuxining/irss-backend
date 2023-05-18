@@ -1,8 +1,36 @@
 [tool.pdm]
 
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_ignores = false
+disallow_any_generics = false
+check_untyped_defs = false
+no_implicit_reexport = true
+ignore_missing_imports = true
+ignore_missing_annotations = false 
+allow_subclassing_private_name = true
+allow_redefinition_of_alias_in_stub = true
+postpone_any_foreground = true   
+check_typeshed_only = false
+strict_optional = false
+
+warn_error = false
+ignore_errors = true
+
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+
 [tool.pdm.dev-dependencies]
 dev = [
-
+    "mypy>=1.3.0",
+    "isort>=5.12.0",
 ]
 [project]
 name = ""
@@ -14,7 +42,7 @@ authors = [
 dependencies = [
     "fastapi-users[beanie,oauth]>=11.0.0",
     "fastapi>=0.95.1",
-    "uvicorn[standard]>=0.22.0",
+    "uvicorn>=0.22.0",
     "setuptools>=67.7.2",
     "loguru>=0.7.0",
 ]

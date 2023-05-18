@@ -4,16 +4,14 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from loguru import logger
 from pymongo.errors import PyMongoError
 
-from .api.api_v1.api import api_router
-from .api.api_v1.endpoints import auth
-from .config import settings
-from .db.init_db import init_db
-from .extensions.logger import logger
-
-# from .extensions.exc_handler import log_requests
-from .utils import resp
+from app.api.api_v1.api import api_router
+from app.api.api_v1.endpoints import auth
+from app.config import settings
+from app.db.init_db import init_db
+from app.utils import resp
 
 app = FastAPI(
     debug=True,
@@ -40,12 +38,12 @@ async def handle_pymongo_error(request, exc):
     logger.warning(
         f"\nMethod:{request.method} URL:{request.url}\nHeaders:{request.headers}\n{traceback.format_exc()}"
     )
-    # PyMongoError
+
     return resp.result(resp.SqlFail, error_detail=exc)
 
 
 @app.middleware("http")
-async def log_requests(request, call_next):
+async def log_requests(request, call_next) -> str:
     logger.info(
         f"\nMethod:{request.method}\nURL:{request.url}\nHeaders:{request.headers}\n{traceback.format_exc()}"
     )
@@ -58,18 +56,18 @@ app.include_router(auth.router, prefix="/auth", tags=["auth"])
 
 
 @app.get("/")
-async def root():
-    return {"message": "Hello World"}
+async def root() -> str:
+    return "message:" "Hello World"
 
 
 @app.on_event("startup")
-async def on_startup():
+async def on_startup() -> None:
     print("---startup---")
     await init_db()
     logger.info("Application startup")
 
 
 @app.on_event("shutdown")
-def shutdown_event():
+def shutdown_event() -> None:
     print("---shutdown---")
     logger.info("Application shutdown")

@@ -10,7 +10,7 @@ class OAuthAccount(BaseOAuthAccount):
     pass
 
 
-class User(BeanieBaseUser, Document):
+class User(BeanieBaseUser, Document):  # type: ignore
     oauth_accounts: List[OAuthAccount] = Field(default_factory=list)
 
 

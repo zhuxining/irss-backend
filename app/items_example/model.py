@@ -15,7 +15,7 @@ class Item(Document):
     price: float
     tax: float | None = None
     tags: set[str] = set()
-    image: list | None = None
+    image: list[object] = []
     create_by: PydanticObjectId | None
     create_time: datetime = Field(default_factory=datetime.utcnow)
     update_by: PydanticObjectId | None = None

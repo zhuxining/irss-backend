@@ -37,7 +37,7 @@ async def update_item(
     return await get_item(item_id)
 
 
-async def delete_item(item_id: PydanticObjectId):
+async def delete_item(item_id: PydanticObjectId) -> None:
     await model.Item.find_one({"_id": item_id}).delete()
 
 
@@ -84,5 +84,7 @@ async def update_user_item(
     return await get_item(item_id)
 
 
-async def delete_user_item(item_id: PydanticObjectId, user_id: PydanticObjectId | None):
+async def delete_user_item(
+    item_id: PydanticObjectId, user_id: PydanticObjectId | None
+) -> None:
     await model.Item.find_one({"_id": item_id, "create_by": user_id}).delete()

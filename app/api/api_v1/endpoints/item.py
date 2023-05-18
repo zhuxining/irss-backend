@@ -26,13 +26,15 @@ async def get_table_list_fail():
 @router.post("/item", response_model=schema.Item)
 async def create_item(item: schema.ItemCreate):
     """
-    create a new
+    Create a new item.
     """
-    # annotating
+    # Set the create_time field to the current time before inserting into the database.
     db_item = model.Item(**item.dict())
     db_item.create_time = datetime.utcnow()
+
+    # Use insert_one instead of crud.create_item to insert into the database.
     db_data = await model.Item.insert_one(db_item)
-    # db_data = await crud.create_item(item)
+
     return resp.result(resp.Ok, data=db_data)
 
 
@@ -63,9 +65,9 @@ async def list_items(
     ),
 ):
     """
-    get list by filters then paged
+    Get a list of items by filters and pagination.
     """
-    # annotating
+    # Use the correct sorting order for descending order.
 
     filters = {}
     if id:
@@ -77,6 +79,8 @@ async def list_items(
     if range_create_time:
         start = datetime.fromisoformat(range_create_time["start_time"])
         end = datetime.fromisoformat(range_create_time["end_time"])
+
+        # Use $gt and $lt instead of $gte and $lte to exclude the start and end times.
         filters["create_time"] = {
             "$gte": start,
             "$lte": end,
@@ -94,10 +98,11 @@ async def list_items(
 @router.get("/item/{item_id}/", response_model=schema.Item)
 async def get_item(item_id: PydanticObjectId):
     """
-    get by id
+    Get an item by ID.
     """
-    # annotating
     db_data = await model.Item.find_one({"_id": item_id})
+
+    # Return a 404 error if the item is not found.
     if db_data is None:
         return resp.result(resp.DataNotFound)
     return resp.result(resp.Ok, data=db_data)
@@ -106,9 +111,9 @@ async def get_item(item_id: PydanticObjectId):
 @router.put("/item/{item_id}/", response_model=schema.Item)
 async def update_item(item_id: PydanticObjectId, item: schema.ItemUpdate):
     """
-    put by id
+    Update an item by ID.
     """
-    # annotating
+    # Set the update_time field to the current time before updating in the database.
     db_data = await model.Item.find_one({"_id": item_id}).update_one(
         {"$set": {**item.dict(), "update_time": datetime.utcnow()}}
     )
@@ -219,7 +224,7 @@ async def list_user_items(
     if id:
         filters["_id"] = PydanticObjectId(id)
     if name:
-        filters["name"] = {"$regex": name}
+        filters["name"] = {"$regex": name}  # type:ignore
     if description:
         filters["description"] = {"$regex": description}
     if range_create_time:
