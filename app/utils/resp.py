@@ -28,7 +28,9 @@ from app.extensions.logger import logger
 # }
 
 
-class Resp(object):
+class Resp(Exception):
+    resps = []
+
     def __init__(
         self,
         error_code: str,
@@ -41,17 +43,23 @@ class Resp(object):
         self.http_status = http_status
         self.show_type = show_type
 
+        Resp.resps.append(self)
+
     def set_msg(self, error_message):
         self.error_message = error_message
         return self
+
+    def __eq__(self, other):
+        return self.http_status == other
 
 
 Ok: Resp = Resp("0000", "Ok", status.HTTP_200_OK, 0)
 
 InvalidRequest: Resp = Resp("4000", "无效请求", status.HTTP_400_BAD_REQUEST, 1)
 ValidationError: Resp = Resp("4022", "参数验证错误", status.HTTP_422_UNPROCESSABLE_ENTITY, 1)
-UnAthenticated: Resp = Resp("4001", "未验证身份", status.HTTP_401_UNAUTHORIZED, 1)
+UnAthenticated: Resp = Resp("4001", "未验证身份", status.HTTP_401_UNAUTHORIZED, 9)
 PermissionDenied: Resp = Resp("4003", "权限不足", status.HTTP_403_FORBIDDEN, 1)
+NotFound: Resp = Resp("4004", "Not Found", status.HTTP_404_NOT_FOUND, 9)
 AlreadyExists: Resp = Resp("4009", "已存在", status.HTTP_409_CONFLICT, 1)
 ResourceExhausted: Resp = Resp("4029", "超出配额限制", status.HTTP_429_TOO_MANY_REQUESTS, 1)
 
@@ -75,17 +83,17 @@ def result(resp: Resp, data: Any = {}, error_detail: Any = None) -> Response:
     # host = socket.gethostname()
     if 400 <= resp.http_status < 500:
         logger.warning(
-            f"status_code:{resp.http_status},errorCode:{resp.error_code},errorMessage:{resp.error_message},traceId:{trace_id},host:{host}"
+            f"\nstatus_code:{resp.http_status},errorCode:{resp.error_code},errorMessage:{resp.error_message},traceId:{trace_id},host:{host}"
         )
     if 500 <= resp.http_status < 600:
         logger.error(
-            f"status_code:{resp.http_status},errorCode:{resp.error_code},errorMessage:{resp.error_message},traceId:{trace_id},host:{host}"
+            f"\nstatus_code:{resp.http_status},errorCode:{resp.error_code},errorMessage:{resp.error_message},traceId:{trace_id},host:{host}"
         )
     return JSONResponse(
         status_code=resp.http_status,
         content=jsonable_encoder(
             {
-                "success": resp.http_status == 200,
+                "success": resp.http_status == 200 | 201,
                 "data": data,
                 "errorCode": resp.error_code,
                 "errorMessage": resp.error_message,

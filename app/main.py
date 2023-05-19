@@ -1,8 +1,7 @@
 import time
 import traceback
 
-from fastapi import FastAPI, HTTPException, Request, status
-from fastapi.encoders import jsonable_encoder
+from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -17,8 +16,6 @@ from app.api.api_v1.endpoints import auth
 from app.config import settings
 from app.db.init_db import init_db
 from app.utils import resp
-
-# from app.extensions.exc_handler import log_requests
 
 app = FastAPI(
     debug=False,
@@ -55,14 +52,18 @@ async def log_requests(request: Request, call_next) -> str:
     response = await call_next(request)
     process_time = time.time() - start_time
     response.headers["X-Process-Time"] = str(process_time)
-    if response.status_code != 200:
+    if 500 > response.status_code >= 400:
         logger.warning(
-            f"\nMethod:{request.method}\nURL:{request.url}\nHeaders:{request.headers}\nProcessTime:{process_time}\n{traceback.format_exc()}"
+            f"\nMethod:{request.method} Status_Code:{response.status_code}\nURL:{request.url}\nHeaders:{request.headers}\nProcessTime:{process_time}\n{traceback.format_exc()}"
+        )
+    if 600 > response.status_code >= 500:
+        logger.error(
+            f"\nMethod:{request.method} Status_Code:{response.status_code}\nURL:{request.url}\nHeaders:{request.headers}\nProcessTime:{process_time}\n{traceback.format_exc()}"
         )
     return response
 
 
-# Define exception handlers for RequestValidationError and PyMongoError.
+# Define Frame exception handlers for RequestValidationError and PyMongoError.
 @app.exception_handler(RequestValidationError)
 async def request_validation_exception_handler(
     request: Request, exc: RequestValidationError
@@ -70,16 +71,21 @@ async def request_validation_exception_handler(
     logger.warning(
         f"\nMethod:{request.method} URL:{request.url}\nHeaders:{request.headers}\n{traceback.format_exc()}"
     )
-    # Return a JSON response with error details.
     return resp.result(resp.ValidationError, error_detail=exc.errors())
 
 
 @app.exception_handler(PyMongoError)
-async def handle_pymongo_error(request, exc):
+async def pymongo_error_handle(request, exc):
     logger.warning(
         f"\nMethod:{request.method} URL:{request.url}\nHeaders:{request.headers}\n{traceback.format_exc()}"
     )
     return resp.result(resp.SqlFail, error_detail=exc)
+
+
+# Define user-defined exception handlers for RespError.
+@app.exception_handler(resp.Resp)
+async def logic_error_handle(request: Request, exc: resp.Resp):
+    return resp.result(resp=exc, error_detail="Business Logic Error, Not Frame Error")
 
 
 # Define a root endpoint that returns a JSON response with a message.
@@ -93,11 +99,11 @@ async def root() -> JSONResponse:
 async def on_startup() -> None:
     print("---startup---")
     await init_db()
-    logger.info("Application startup")
+    logger.success("Application startup")
 
 
 # Define an event handler for application shutdown that logs a message.
 @app.on_event("shutdown")
 def shutdown_event() -> None:
     print("---shutdown---")
-    logger.info("Application shutdown")
+    logger.success("Application shutdown")

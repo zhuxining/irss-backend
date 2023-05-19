@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Any
 
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, Depends, Path, Query
@@ -15,14 +14,19 @@ from app.utils.tools_func import paginated_find
 router = APIRouter()
 
 
-@router.get("/table/list", response_model=list[schema.ItemBase])
-async def get_table_list() -> Response:
-    return resp.result(resp.Ok)
+@router.get("/test/test1", response_model=list[schema.ItemBase])
+async def get_table_list(item_id) -> Response:
+    db_data = await crud.get_item(item_id)
+    return resp.result(resp.Ok, data=db_data)
 
 
-@router.get("/table/list-fail")
+@router.get("/test/test2")
 async def get_table_list_fail() -> Response:
-    return resp.result(resp.ValidationError)
+    db_data = await model.Item.find_many(
+        {"name": {"$regex": "str"}},
+        **{"projection": {"name": 1}},
+    ).to_list()
+    return resp.result(resp.Ok, data=db_data)
 
 
 @router.post("/item", response_model=schema.Item)
@@ -30,21 +34,12 @@ async def create_item(item: schema.ItemCreate) -> Response:
     """
     Create a new item.
     """
-    # Set the create_time field to the current time before inserting into the database.
-    db_item = model.Item(**item.dict())
-    db_item.create_time = datetime.utcnow()
-
-    # Use insert_one instead of crud.create_item to insert into the database.
-    db_data = await model.Item.insert_one(db_item)
-
+    db_data = await crud.create_item(item)
     return resp.result(resp.Ok, data=db_data)
 
 
 @router.get(
-    "/items",
-    response_model=list[schema.Item],
-    response_model_exclude_unset=True,
-    response_model_exclude={"errorDetail"},
+    "/items", response_model=list[schema.Item], response_description="list of items"
 )
 async def list_items(
     id: str = Query(default=None, description="mongodb ObjectId"),
