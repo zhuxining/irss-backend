@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 import motor.motor_asyncio
@@ -10,8 +11,9 @@ class OAuthAccount(BaseOAuthAccount):
     pass
 
 
-class User(BeanieBaseUser, Document):  # type: ignore
+class User(BeanieBaseUser, Document):
     oauth_accounts: List[OAuthAccount] = Field(default_factory=list)
+    create_time: datetime = Field(default_factory=datetime.utcnow)
 
 
 async def get_user_db():

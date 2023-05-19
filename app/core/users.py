@@ -1,9 +1,9 @@
 import os
-from typing import Optional
+from typing import Any, Optional, Union
 
 from beanie import PydanticObjectId
-from fastapi import Depends, Request
-from fastapi_users import BaseUserManager, FastAPIUsers
+from fastapi import Depends, Request, Response
+from fastapi_users import BaseUserManager, FastAPIUsers, InvalidPasswordException
 from fastapi_users.authentication import (
     AuthenticationBackend,
     BearerTransport,
@@ -13,6 +13,7 @@ from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 from httpx_oauth.clients.google import GoogleOAuth2
 
 from app.models.users import User, get_user_db
+from app.schemas.users import UserCreate
 
 SECRET = "SECRET"
 
@@ -26,8 +27,28 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):  # 
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
 
+    async def validate_password(
+        self,
+        password: str,
+        user: Union[UserCreate, User],
+    ) -> None:
+        if len(password) < 8:
+            raise InvalidPasswordException(
+                reason="Password should be at least 8 characters"
+            )
+        if user.email in password:
+            raise InvalidPasswordException(reason="Password should not contain e-mail")
+
     async def on_after_register(self, user: User, request: Optional[Request] = None):
         print(f"User {user.id} has registered.")
+
+    async def on_after_login(
+        self,
+        user: User,
+        request: Optional[Request] = None,
+        response: Optional[Response] = None,
+    ):
+        print(f"User {user.id} logged in.")
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
@@ -38,6 +59,28 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):  # 
         self, user: User, token: str, request: Optional[Request] = None
     ):
         print(f"Verification requested for user {user.id}. Verification token: {token}")
+
+    async def on_after_reset_password(
+        self, user: User, request: Optional[Request] = None
+    ):
+        print(f"User {user.id} has reset their password.")
+
+    async def on_after_verify(self, user: User, request: Optional[Request] = None):
+        print(f"User {user.id} has been verified")
+
+    async def on_after_update(
+        self,
+        user: User,
+        update_dict: dict[str, Any],
+        request: Optional[Request] = None,
+    ):
+        print(f"User {user.id} has been updated with {update_dict}.")
+
+    async def on_before_delete(self, user: User, request: Optional[Request] = None):
+        print(f"User {user.id} is going to be deleted")
+
+    async def on_after_delete(self, user: User, request: Optional[Request] = None):
+        print(f"User {user.id} is successfully deleted")
 
 
 async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):

@@ -1,7 +1,8 @@
 from datetime import datetime
+from typing import Any
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Body, Depends, Query
+from fastapi import APIRouter, Body, Depends, Path, Query
 from fastapi.responses import JSONResponse, Response
 from pydantic import Json
 
@@ -39,7 +40,12 @@ async def create_item(item: schema.ItemCreate) -> Response:
     return resp.result(resp.Ok, data=db_data)
 
 
-@router.get("/items", response_model=list[schema.Item])
+@router.get(
+    "/items",
+    response_model=list[schema.Item],
+    response_model_exclude_unset=True,
+    response_model_exclude={"errorDetail"},
+)
 async def list_items(
     id: str = Query(default=None, description="mongodb ObjectId"),
     name: str = Query(default=None, max_length=50, description="fuzzy"),
