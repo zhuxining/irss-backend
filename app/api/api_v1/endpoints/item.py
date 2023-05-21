@@ -15,7 +15,7 @@ router = APIRouter()
 
 
 @router.get("/test/test1", response_model=list[schema.ItemBase])
-async def get_table_list(item_id) -> Response:
+async def get_table_list(item_id: PydanticObjectId) -> Response:
     db_data = await crud.get_item(item_id)
     return resp.result(resp.Ok, data=db_data)
 
