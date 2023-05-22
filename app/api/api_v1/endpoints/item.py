@@ -10,6 +10,7 @@ from app.items_example import crud, model, schema
 from app.models.users import User
 from app.utils import resp
 from app.utils.tools_func import paginated_find
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -22,10 +23,7 @@ async def get_table_list(item_id: PydanticObjectId) -> Response:
 
 @router.get("/test/test2")
 async def get_table_list_fail() -> Response:
-    db_data = await model.Item.find_many(
-        {"name": {"$regex": "str"}},
-        **{"projection": {"name": 1}},
-    ).to_list()
+    db_data = await model.Item.find({"name": {"$regex": "str"}}).to_list()
     return resp.result(resp.Ok, data=db_data)
 
 

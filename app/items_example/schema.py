@@ -27,3 +27,8 @@ class ItemUpdate(ItemBase):
 
 class Item(ItemBase):
     pass
+
+
+class ItemRead(BaseModel):
+    name: str
+    description: str
