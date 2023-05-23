@@ -54,13 +54,17 @@ class Resp(Exception):
 
 Ok: Resp = Resp("0000", "Ok", status.HTTP_200_OK, 0)
 
-InvalidRequest: Resp = Resp("4000", "无效请求", status.HTTP_400_BAD_REQUEST, 1)
-ValidationError: Resp = Resp("4022", "参数验证错误", status.HTTP_422_UNPROCESSABLE_ENTITY, 1)
-UnAthenticated: Resp = Resp("4001", "未验证身份", status.HTTP_401_UNAUTHORIZED, 9)
-PermissionDenied: Resp = Resp("4003", "权限不足", status.HTTP_403_FORBIDDEN, 1)
+InvalidRequest: Resp = Resp("4000", "Invalid Request", status.HTTP_400_BAD_REQUEST, 1)
+ValidationError: Resp = Resp(
+    "4022", "Validation Error", status.HTTP_422_UNPROCESSABLE_ENTITY, 1
+)
+UnAthenticated: Resp = Resp("4001", "UnAthenticated", status.HTTP_401_UNAUTHORIZED, 9)
+PermissionDenied: Resp = Resp("4003", "Permission Denied", status.HTTP_403_FORBIDDEN, 1)
 NotFound: Resp = Resp("4004", "Not Found", status.HTTP_404_NOT_FOUND, 9)
-AlreadyExists: Resp = Resp("4009", "已存在", status.HTTP_409_CONFLICT, 1)
-ResourceExhausted: Resp = Resp("4029", "超出配额限制", status.HTTP_429_TOO_MANY_REQUESTS, 1)
+AlreadyExists: Resp = Resp("4009", "Already Exists", status.HTTP_409_CONFLICT, 1)
+ResourceExhausted: Resp = Resp(
+    "4029", "Resource Exhausted", status.HTTP_429_TOO_MANY_REQUESTS, 1
+)
 
 ServerError: Resp = Resp("5000", "服务器开小差了", status.HTTP_500_INTERNAL_SERVER_ERROR, 1)
 BadGateway: Resp = Resp("5002", "网关错误", status.HTTP_502_BAD_GATEWAY, 1)
