@@ -5,21 +5,19 @@ from beanie import Document, PydanticObjectId
 from pydantic import BaseModel, Field
 from pymongo import IndexModel
 
-from app.models.feeds import Feed
 
-
-class Group(Document):
-    name: str
+class Tag(Document):
+    name: str = Field(default="Default")
+    path: str | None = None
     icon_type: str | None = None
     icon_value: str | None = None
     update_time: datetime
-    feed: list[Feed] | None = None
 
     owner_id: PydanticObjectId
 
     class Settings:
-        name = "feed-groups"
+        name = "entry-tags"
         indexes = [
             IndexModel([("name", pymongo.ASCENDING)], unique=False),
-            IndexModel([("owner_id", pymongo.ASCENDING)], unique=False),
+            IndexModel([("path", pymongo.ASCENDING)], unique=False),
         ]

@@ -6,6 +6,7 @@ from beanie import Document, PydanticObjectId
 from pydantic import BaseModel, Field
 from pymongo import IndexModel
 from app.models.feeds import Feed
+from app.models.entry_tags import Tag
 
 
 class SummaryDatail(BaseModel):
@@ -40,6 +41,11 @@ class Entry(Document):
     is_hide: bool = False
     hide_modified: datetime | None = None
 
+    is_star: bool = False
+    star_modified: datetime | None = None
+    # start then tags, unstart can clear tags
+    tag: list[Tag] | None = None
+
     owner_id: PydanticObjectId | None = None
     create_time: datetime = Field(default_factory=datetime.now)
     update_time: datetime | None = None
@@ -56,6 +62,7 @@ class Entry(Document):
                     ("title", pymongo.TEXT),
                     ("summary", pymongo.TEXT),
                     ("author", pymongo.TEXT),
+                    ("tag", pymongo.TEXT),
                 ],
                 name="text_index",
             ),
