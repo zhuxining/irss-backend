@@ -2,7 +2,6 @@ from datetime import datetime
 
 import pymongo
 from beanie import Document, PydanticObjectId
-from pydantic import BaseModel, Field
 from pymongo import IndexModel
 
 from app.models.feeds import Feed

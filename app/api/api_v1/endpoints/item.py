@@ -8,7 +8,7 @@ from pydantic import Json
 from app.core.users import current_active_user
 from app.items_example import crud, model, schema
 from app.models.users import User
-from app.utils import resp
+from app.common.response import resp
 from app.utils.tools_func import paginated_find
 from pydantic import BaseModel
 

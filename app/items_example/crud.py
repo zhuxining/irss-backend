@@ -3,9 +3,8 @@ from datetime import datetime
 from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 
+from app.common.response import resp
 from app.items_example import model, schema
-from app.utils import resp
-from app.utils.resp import Resp
 
 
 async def create_item(item: schema.ItemCreate) -> model.Item:

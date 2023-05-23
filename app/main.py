@@ -1,21 +1,11 @@
-import time
-import traceback
+from fastapi import FastAPI
 
-from fastapi import FastAPI, Request
-from fastapi.exceptions import RequestValidationError
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import JSONResponse
-from loguru import logger
-from pymongo.errors import PyMongoError
-
-from app.api.api_v1.api import api_router
-from app.api.api_v1.endpoints import auth
+from app.api.routers import register_router
+from app.common.db.init_db import init_db
+from app.common.extension.exc_handler import register_exception
+from app.common.logger import log
+from app.common.middleware.middleware_add import register_middleware
 from app.config import settings
-from app.db.init_db import init_db
-from app.utils import resp
 
 app = FastAPI(
     debug=False,
@@ -25,85 +15,19 @@ app = FastAPI(
     openapi_url=f"{settings.api_prefix}/openapi.json",
 )
 
-# Include routers for API endpoints.
-app.include_router(api_router, prefix=settings.api_prefix)
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
-
-# Add middleware to the application.
-
-# app.add_middleware(HTTPSRedirectMiddleware)
-# app.add_middleware(
-#     TrustedHostMiddleware, allowed_hosts=["example.com", "*.example.com"]
-# )
-app.add_middleware(GZipMiddleware, minimum_size=1000)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-# Define a middleware function to log incoming requests and outgoing responses.
-@app.middleware("http")
-async def log_requests(request: Request, call_next) -> str:
-    start_time = time.time()
-    response = await call_next(request)
-    process_time = time.time() - start_time
-    response.headers["X-Process-Time"] = str(process_time)
-    if 500 > response.status_code >= 400:
-        logger.warning(
-            f"\nMethod:{request.method} Status_Code:{response.status_code}\nURL:{request.url}\nHeaders:{request.headers}\nProcessTime:{process_time}\n{traceback.format_exc()}"
-        )
-    if 600 > response.status_code >= 500:
-        logger.error(
-            f"\nMethod:{request.method} Status_Code:{response.status_code}\nURL:{request.url}\nHeaders:{request.headers}\nProcessTime:{process_time}\n{traceback.format_exc()}"
-        )
-    return response
-
-
-# Define Frame exception handlers for RequestValidationError and PyMongoError.
-@app.exception_handler(RequestValidationError)
-async def request_validation_exception_handler(
-    request: Request, exc: RequestValidationError
-):
-    logger.warning(
-        f"\nMethod:{request.method} URL:{request.url}\nHeaders:{request.headers}\n{traceback.format_exc()}"
-    )
-    return resp.result(resp.ValidationError, error_detail=exc.errors())
-
-
-@app.exception_handler(PyMongoError)
-async def pymongo_error_handle(request, exc):
-    logger.warning(
-        f"\nMethod:{request.method} URL:{request.url}\nHeaders:{request.headers}\n{traceback.format_exc()}"
-    )
-    return resp.result(resp.SqlFail, error_detail=exc)
-
-
-# Define user-defined exception handlers for RespError.
-@app.exception_handler(resp.Resp)
-async def logic_error_handle(request: Request, exc: resp.Resp):
-    return resp.result(resp=exc, error_detail="Business Logic Error, Not Frame Error")
-
-
-# Define a root endpoint that returns a JSON response with a message.
-@app.get("/")
-async def root() -> JSONResponse:
-    return JSONResponse(content={"message": "Hello World"})
+register_router(app)
+register_middleware(app)
+register_exception(app)
 
 
 # Define an event handler for application startup that initializes the database connection.
 @app.on_event("startup")
 async def on_startup() -> None:
-    print("---startup---")
     await init_db()
-    logger.success("Application startup")
+    log.success("Application startup")
 
 
 # Define an event handler for application shutdown that logs a message.
 @app.on_event("shutdown")
 def shutdown_event() -> None:
-    print("---shutdown---")
-    logger.success("Application shutdown")
+    log.success("Application shutdown")

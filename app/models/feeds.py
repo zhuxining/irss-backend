@@ -1,5 +1,4 @@
 from datetime import datetime
-from uuid import UUID, uuid4
 
 import pymongo
 from beanie import Document, PydanticObjectId

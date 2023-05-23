@@ -1,13 +1,12 @@
 import socket
-
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from fastapi import status
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, Response
 
-from app.extensions.logger import logger
+from app.common.logger import log
 
 # export interface response {
 #   success: boolean; // if request is success
@@ -82,11 +81,11 @@ def result(resp: Resp, data: Any = {}, error_detail: Any = None) -> Response:
 
     # host = socket.gethostname()
     if 400 <= resp.http_status < 500:
-        logger.warning(
+        log.warning(
             f"\nstatus_code:{resp.http_status},errorCode:{resp.error_code},errorMessage:{resp.error_message},traceId:{trace_id},host:{host}"
         )
     if 500 <= resp.http_status < 600:
-        logger.error(
+        log.error(
             f"\nstatus_code:{resp.http_status},errorCode:{resp.error_code},errorMessage:{resp.error_message},traceId:{trace_id},host:{host}"
         )
     return JSONResponse(

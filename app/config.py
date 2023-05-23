@@ -15,6 +15,11 @@ class Settings(BaseSettings):
 
     db_url: str = "mongodb://irss-test%40wr:%5EXEwJ85TG8E%40@8.219.156.181:27017/?authSource=irss-test&readPreference=primary&ssl=false&directConnection=true"
 
+    # Middleware
+    middleware_https_redirect: bool = False
+    middleware_trusted_host: bool = False
+    middleware_gzip: bool = True
+    middleware_cors: bool = True
     cors_origins = [
         "http://localhost.tiangolo.com",
         "https://localhost.tiangolo.com",

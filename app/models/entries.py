@@ -1,12 +1,12 @@
 from datetime import datetime
-from uuid import UUID, uuid4
 
 import pymongo
 from beanie import Document, PydanticObjectId
 from pydantic import BaseModel, Field
 from pymongo import IndexModel
-from app.models.feeds import Feed
+
 from app.models.entry_tags import Tag
+from app.models.feeds import Feed
 
 
 class SummaryDatail(BaseModel):

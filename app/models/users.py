@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import List
 
-import motor.motor_asyncio
 from beanie import Document
 from fastapi_users.db import BaseOAuthAccount, BeanieBaseUser, BeanieUserDatabase
 from pydantic import Field
