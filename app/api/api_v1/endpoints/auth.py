@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 
 from app.core.users import (
-    SECRET,
     auth_backend,
     current_active_user,
     fastapi_users,
@@ -9,9 +8,10 @@ from app.core.users import (
 )
 from app.models.users import User
 from app.schemas.users import UserCreate, UserRead
+from app.config import settings
 
 router = APIRouter()
-
+SECRET = settings.token_secret_key
 
 router.include_router(fastapi_users.get_auth_router(auth_backend), prefix="/jwt")
 router.include_router(fastapi_users.get_register_router(UserRead, UserCreate))
