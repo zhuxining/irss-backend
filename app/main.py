@@ -20,14 +20,12 @@ register_middleware(app)
 register_exception(app)
 
 
-# Define an event handler for application startup that initializes the database connection.
 @app.on_event("startup")
 async def on_startup() -> None:
-    await init_db()
     log.success("Application startup")
+    await init_db()
 
 
-# Define an event handler for application shutdown that logs a message.
 @app.on_event("shutdown")
 def shutdown_event() -> None:
     log.success("Application shutdown")
