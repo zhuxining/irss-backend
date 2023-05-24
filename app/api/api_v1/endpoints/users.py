@@ -1,12 +1,12 @@
-from curses.ascii import US
 from typing import Any
+
+from beanie import PydanticObjectId
 from fastapi import APIRouter, Response
 
-from app.core.users import fastapi_users
-from app.schemas.users import UserRead, UserUpdate
-from app.models.users import User
-from beanie import PydanticObjectId
 from app.common.response import resp, state
+from app.core.users import fastapi_users
+from app.models.users import User
+from app.schemas.users import UserRead, UserUpdate
 
 router = APIRouter()
 

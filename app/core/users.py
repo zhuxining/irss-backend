@@ -1,4 +1,5 @@
 import os
+from re import S
 from typing import Any, Optional, Union
 
 from beanie import PydanticObjectId
@@ -15,7 +16,7 @@ from httpx_oauth.clients.google import GoogleOAuth2
 from app.models.users import User, get_user_db
 from app.schemas.users import UserCreate
 
-SECRET = "SECRET"
+from app.config import settings
 
 google_oauth_client = GoogleOAuth2(
     os.getenv("GOOGLE_OAUTH_CLIENT_ID", ""),
@@ -24,8 +25,13 @@ google_oauth_client = GoogleOAuth2(
 
 
 class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):  # type: ignore
-    reset_password_token_secret = SECRET
-    verification_token_secret = SECRET
+    reset_password_token_secret = settings.reset_password_token_secret
+    reset_password_token_lifetime_seconds = (
+        settings.reset_password_token_lifetime_seconds
+    )
+
+    verification_token_secret = settings.verification_token_secret
+    verification_token_lifetime_seconds = settings.verification_token_lifetime_seconds
 
     async def validate_password(
         self,
@@ -91,7 +97,11 @@ bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
 
 def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
+    return JWTStrategy(
+        secret=settings.token_secret_key,
+        lifetime_seconds=settings.token_lifetime_seconds,
+        algorithm=settings.token_algorithm,
+    )
 
 
 auth_backend = AuthenticationBackend(
