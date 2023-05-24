@@ -46,7 +46,7 @@ def result(state: State, data: Any = {}, error_detail: Any = None) -> Response:
         status_code=state.http_status,
         content=jsonable_encoder(
             {
-                "success": state.http_status == 200 | 201,
+                "success": state.http_status == (200 or 201),
                 "data": data,
                 "errorCode": state.error_code,
                 "errorMessage": state.error_message,
