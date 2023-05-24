@@ -6,7 +6,7 @@ from app.core.users import fastapi_users
 from app.schemas.users import UserRead, UserUpdate
 from app.models.users import User
 from beanie import PydanticObjectId
-from app.common.response import resp
+from app.common.response import resp, state
 
 router = APIRouter()
 
@@ -24,5 +24,5 @@ router.include_router(
 )
 async def get_user(user_id: PydanticObjectId) -> Any:
     UserRead = await User.find_one({"_id": user_id})
-    # return resp.result(resp.Ok, data=UserRead)
+    # return resp.result(state.Ok, data=UserRead)
     return UserRead

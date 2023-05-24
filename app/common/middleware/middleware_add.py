@@ -42,10 +42,10 @@ def register_middleware(app: FastAPI) -> None:
         response.headers["X-Process-Time"] = str(process_time)
         if 500 > response.status_code >= 400:
             log.warning(
-                f"\nMethod:{request.method} Status_Code:{response.status_code}\nURL:{request.url}\nHeaders:{request.headers}\nProcessTime:{process_time}\n{traceback.format_exc()}"
+                f"\nMethod:{request.method} \nURL:{request.url}\nHeaders:{request.headers}\nClient:{request.client}\nCookies:{request.cookies}\nProcessTime:{process_time}\n{traceback.format_exc()}"
             )
         if 600 > response.status_code >= 500:
             log.error(
-                f"\nMethod:{request.method} Status_Code:{response.status_code}\nURL:{request.url}\nHeaders:{request.headers}\nProcessTime:{process_time}\n{traceback.format_exc()}"
+                f"\nMethod:{request.method} \nURL:{request.url}\nHeaders:{request.headers}\nClient:{request.client}\nCookies:{request.cookies}\nProcessTime:{process_time}\n{traceback.format_exc()}"
             )
         return response

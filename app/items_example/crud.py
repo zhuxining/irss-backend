@@ -3,7 +3,7 @@ from datetime import datetime
 from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 
-from app.common.response import resp
+from app.common.response import resp, state
 from app.items_example import model, schema
 
 
@@ -22,7 +22,7 @@ async def get_items() -> list[model.Item]:
 async def get_item(item_id: PydanticObjectId) -> model.Item:
     db_item = await model.Item.find_one({"_id": PydanticObjectId(item_id)})
     if db_item is None:
-        raise resp.DataNotFound
+        raise state.DataNotFound
     return db_item
 
 
