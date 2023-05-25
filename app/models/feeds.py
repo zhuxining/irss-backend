@@ -2,22 +2,22 @@ from datetime import datetime
 
 import pymongo
 from beanie import Document, PydanticObjectId
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 from pymongo import IndexModel
 
 
 class Logo(BaseModel):
-    url: str
+    url: HttpUrl
     # The default feed.logo : "url + /favicon.ico"
     is_default: bool = True
     is_choose: bool = True
 
 
 class Feed(Document):
-    url: str
+    url: HttpUrl
     updated: datetime | None = None
     title: str | None = None
-    link: str | None = None
+    link: HttpUrl | None = None
     author: str | None = None
     subtitle: str | None = None
     # The feed type and version,rss or atom

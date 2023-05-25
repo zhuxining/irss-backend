@@ -3,7 +3,7 @@ from typing import Any
 
 import pymongo
 from beanie import Document, PydanticObjectId
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 from pymongo import IndexModel
 
 from app.models.entry_tags import Tag
@@ -24,11 +24,10 @@ class Enclosures(BaseModel):
 
 
 class Entry(Document):
-    feed_id: PydanticObjectId
-    feed_url: str
+    feed_url: HttpUrl
 
     title: str | None = None
-    link: str
+    link: HttpUrl
     author: str | None = None
     published: datetime | None = None
     summary: str | None = None
@@ -52,7 +51,7 @@ class Entry(Document):
     update_time: datetime | None = None
 
     # The URL of the original feed of the entry.
-    original_feed_url: str | None = None
+    original_feed_url: HttpUrl | None = None
 
     class Settings:
         name = "entries"

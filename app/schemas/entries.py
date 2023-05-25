@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any
 
 from beanie import PydanticObjectId
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 from pymongo import IndexModel
 
 from app.models.entries import Content, Enclosures
@@ -10,10 +10,10 @@ from app.models.entry_tags import Tag
 
 
 class EntryBase(BaseModel):
-    feed_url: str
+    feed_url: HttpUrl
 
     title: str | None = None
-    link: str
+    link: HttpUrl
     author: str | None = None
     published: datetime | None = None
     summary: str | None = None
@@ -22,8 +22,6 @@ class EntryBase(BaseModel):
 
 
 class EntryCreate(EntryBase):
-    feed_id: PydanticObjectId
-
     owner_id: PydanticObjectId | None = None
 
 

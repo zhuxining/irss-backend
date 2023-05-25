@@ -1,14 +1,13 @@
 import asyncio
 from datetime import datetime
-from turtle import update
 from typing import Any
 
 import feedparser
 
 from app.common.logger import log
 from app.common.response import state
+from app.schemas.entries import Content, Enclosures, EntryBase
 from app.schemas.feeds import FeedBase
-from app.schemas.entries import EntryBase, Content, Enclosures
 from app.utils.time_util import strutc_to_datetime
 
 
@@ -54,7 +53,7 @@ SURVIVABLE_EXCEPTION_TYPES = (
 )
 
 
-async def parse_feed(url) -> tuple[FeedBase, list[EntryBase]] | None:
+async def parse_feed(url) -> tuple[FeedBase, list[EntryBase]]:
     try:
         loop = asyncio.get_running_loop()
         future = loop.run_in_executor(None, feedparser.parse, url)
@@ -63,10 +62,10 @@ async def parse_feed(url) -> tuple[FeedBase, list[EntryBase]] | None:
             exception = d.get("bozo_exception")
             if isinstance(exception, SURVIVABLE_EXCEPTION_TYPES):
                 log.info(f"parse {url}: got {exception}")
-                raise state.BusinessError.set_msg("解析Rss地址超时，请检查URL是否正确后重试")
+                raise state.BusinessError.set_msg("解析Rss地址超时,请检查URL是否正确后重试")
             else:
                 log.info(f"parse {url}: error while parsing feed")
-                raise state.BusinessError.set_msg("解析Rss地址超时，请检查URL是否正确后重试")
+                raise state.BusinessError.set_msg("解析Rss地址超时,请检查URL是否正确后重试")
 
         if not d.version:
             log.info(f"parse {url}: unknown feed type")
