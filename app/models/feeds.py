@@ -29,7 +29,7 @@ class Feed(Document):
     logo: list[Logo] | None = None
 
     owner_id: PydanticObjectId | None = None
-    create_time: datetime = Field(default_factory=datetime.now)
+    create_time: datetime = Field(default_factory=datetime.utcnow)
     update_time: datetime | None = None
     last_exception: None = None
 

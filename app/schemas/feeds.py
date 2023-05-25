@@ -1,11 +1,29 @@
+from datetime import datetime
+
+from beanie import PydanticObjectId
 from pydantic import BaseModel
+
+from app.models.feeds import Logo
 
 
 class FeedBase(BaseModel):
-    title: str
-    link: str
-    description: str
+    url: str
+    updated: datetime | None = None
+    title: str | None = None
+    link: str | None = None
+    author: str | None = None
+    subtitle: str | None = None
+    version: str | None = None
 
 
-class FeedTest(BaseModel):
-    title: str
+class FeedCreate(FeedBase):
+    view_layout: str | None = None
+    display_title: str | None = None
+    updates_enabled: bool = True
+    logo: list[Logo] | None = None
+
+    owner_id: PydanticObjectId | None = None
+
+
+class FeedUpdate(FeedBase):
+    update_time: datetime | None = None

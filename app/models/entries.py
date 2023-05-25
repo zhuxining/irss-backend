@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 import pymongo
 from beanie import Document, PydanticObjectId
@@ -9,7 +10,7 @@ from app.models.entry_tags import Tag
 from app.models.feeds import Feed
 
 
-class SummaryDatail(BaseModel):
+class Content(BaseModel):
     type: str
     language: str | None = None
     base: str | None = None
@@ -17,9 +18,9 @@ class SummaryDatail(BaseModel):
 
 
 class Enclosures(BaseModel):
-    href: str
+    href: str | None = None
     length: str | None = None
-    type: str
+    type: str | None = None
 
 
 class Entry(Document):
@@ -31,7 +32,7 @@ class Entry(Document):
     author: str | None = None
     published: datetime | None = None
     summary: str | None = None
-    summary_detail: list[SummaryDatail] | None = None
+    content: list[Content] | None = None
     enclosures: list[Enclosures] | None = None
 
     is_read: bool = False
@@ -47,7 +48,7 @@ class Entry(Document):
     tag: list[Tag] | None = None
 
     owner_id: PydanticObjectId | None = None
-    create_time: datetime = Field(default_factory=datetime.now)
+    create_time: datetime = Field(default_factory=datetime.utcnow)
     update_time: datetime | None = None
 
     # The URL of the original feed of the entry.
