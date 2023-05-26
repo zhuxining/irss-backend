@@ -3,58 +3,37 @@ from datetime import datetime
 from beanie import PydanticObjectId
 from fastapi import APIRouter, Body, Depends, Path, Query
 from fastapi.responses import Response
-from pydantic import HttpUrl, Json
+from pydantic import Json
 
 from app.common.response import resp, state
 from app.core.feed_parser import parse_feed
 from app.core.users import current_active_user
-from app.models.feeds import Feed
+from app.crud.entries import c_entry
+from app.models.entries import Entry
 from app.models.users import User
-from app.schemas.feeds import FeedBase, FeedCreate, FeedUpdate
+from app.schemas.entries import EntryBase, EntryCreate, EntryUpdate
 from app.utils.tools_func import paginated_find
-from app.crud.feeds import c_feed, r_feed
 
 router = APIRouter()
 
 
-@router.get("/parser/")
-async def parser_url(url: HttpUrl) -> Response:
-    feed, entries = await parse_feed(url)
-    return resp.result(state.Ok, data=entries)
-
-
-@router.get("/parser0/")
-async def parser_url_feed(url: HttpUrl) -> Response:
-    feed, entries = await parse_feed(url)
-    return resp.result(state.Ok, data=feed)
-
-
-@router.get("/parser1/")
-async def parser_url_entry(url: HttpUrl) -> Response:
-    feed, entries = await parse_feed(url)
-    return resp.result(state.Ok, data=entries)
-
-
-@router.get("/parser2/")
-async def create(url: HttpUrl, display_title: str) -> Response:
-    feed, entries = await parse_feed(url)
-    db_feed = FeedCreate(**feed.dict())
-    db_feed.display_title = display_title
-    db_data = await c_feed(db_feed)
+@router.get("/test/test2")
+async def get_table_list_fail() -> Response:
+    db_data = await Entry.find({"name": {"$regex": "str"}}).to_list()
     return resp.result(state.Ok, data=db_data)
 
 
-@router.post("/", response_model=Feed)
-async def create_feed(feed: FeedCreate) -> Response:
+@router.post("/", response_model=Entry)
+async def create_entry(entry: EntryCreate) -> Response:
     """
-    Create a new feed.
+    Create a new entry.
     """
-    db_data = await c_feed(feed)
+    db_data = await c_entry(entry)
     return resp.result(state.Ok, data=db_data)
 
 
-@router.get("/", response_model=list[Feed], response_description="list of feeds")
-async def list_feeds(
+@router.get("/", response_model=list[Entry], response_description="list of entries")
+async def list_entries(
     id: str = Query(default=None, description="mongodb ObjectId"),
     name: str = Query(default=None, max_length=50, description="fuzzy"),
     description: str = Query(default=None, max_length=50, description="fuzzy"),
@@ -80,7 +59,7 @@ async def list_feeds(
     ),
 ) -> Response:
     """
-    Get a list of feeds by filters and pagination.
+    Get a list of entries by filters and pagination.
     """
     # Use the correct sorting order for descending order.
 
@@ -105,48 +84,48 @@ async def list_feeds(
             "$gte": range_num["min_value"],
             "$lte": range_num["max_value"],
         }
-    db_data = await paginated_find(Feed, filters, current, page_size, sort)
+    db_data = await paginated_find(Entry, filters, current, page_size, sort)
 
     return resp.result(state.Ok, data=db_data)
 
 
-@router.get("/{feed_id}/", response_model=Feed)
-async def get_feed(feed_id: PydanticObjectId) -> Response:
+@router.get("/{entry_id}/", response_model=Entry)
+async def get_entry(entry_id: PydanticObjectId) -> Response:
     """
-    Get an feed by ID.
+    Get an entry by ID.
     """
-    db_data = await Feed.find_one({"_id": feed_id})
+    db_data = await Entry.find_one({"_id": entry_id})
 
-    # Return a 404 error if the feed is not found.
+    # Return a 404 error if the entry is not found.
     if db_data is None:
         return resp.result(state.DataNotFound)
     return resp.result(state.Ok, data=db_data)
 
 
-@router.put("/{feed_id}/", response_model=Feed)
-async def update_feed(feed_id: PydanticObjectId, feed: FeedUpdate) -> Response:
+@router.put("/{entry_id}/", response_model=Entry)
+async def update_entry(entry_id: PydanticObjectId, entry: EntryUpdate) -> Response:
     """
-    Update an feed by ID.
+    Update an entry by ID.
     """
     # Set the update_time field to the current time before updating in the database.
-    db_data = await Feed.find_one({"_id": feed_id}).update_one(
-        {"$set": {**feed.dict(), "update_time": datetime.utcnow()}}
+    db_data = await Entry.find_one({"_id": entry_id}).update_one(
+        {"$set": {**entry.dict(), "update_time": datetime.utcnow()}}
     )
     return resp.result(state.Ok, data=db_data)
 
 
-@router.delete("/{feed_id}/", response_model={})
-async def delete_feed(feed_id: PydanticObjectId) -> Response:
+@router.delete("/{entry_id}/", response_model={})
+async def delete_entry(entry_id: PydanticObjectId) -> Response:
     """
     delete by id
     """
     # annotating
-    await Feed.find_one({"_id": feed_id}).delete()
+    await Entry.find_one({"_id": entry_id}).delete()
     return resp.result(state.Ok, data={})
 
 
-@router.get("/search/", response_model=list[Feed])
-async def search_feeds(
+@router.get("/search/", response_model=list[Entry])
+async def search_entries(
     q: str = Query(default=None, max_length=50, description="fuzzy:name、description"),
     page_size: int = Query(example=10, description=""),
     current: int = Query(example=1, description=""),
@@ -164,13 +143,13 @@ async def search_feeds(
     if q:
         filters = {"$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}]}
 
-    db_data = await paginated_find(Feed, filters, current, page_size, sort)
+    db_data = await paginated_find(Entry, filters, current, page_size, sort)
 
     return resp.result(state.Ok, data=db_data)
 
 
-@router.post("/query/", response_model=list[Feed])
-async def query_feeds(
+@router.post("/query/", response_model=list[Entry])
+async def query_entries(
     filters: dict = Body(default=None, example={"name": "string"}, description="query"),
     page_size: int = Query(example=10, description=""),
     current: int = Query(example=1, description=""),
@@ -184,27 +163,27 @@ async def query_feeds(
     post filters for query then paged
     """
     # annotating
-    db_data = await paginated_find(Feed, filters, current, page_size, sort)
+    db_data = await paginated_find(Entry, filters, current, page_size, sort)
     return resp.result(state.Ok, data=db_data)
 
 
-@router.post("/user-feed", response_model=Feed)
-async def create_user_feed(
-    feed: FeedCreate, user: User = Depends(current_active_user)
+@router.post("/user-entry", response_model=Entry)
+async def create_user_entry(
+    entry: EntryCreate, user: User = Depends(current_active_user)
 ) -> Response:
     """
     create a new
     """
     # annotating
-    db_feed = Feed(**feed.dict())
-    db_feed.create_by = user.id
-    db_feed.create_time = datetime.utcnow()
-    db_data = await Feed.insert_one(db_feed)
+    db_entry = Entry(**entry.dict())
+    db_entry.create_by = user.id
+    db_entry.create_time = datetime.utcnow()
+    db_data = await Entry.insert_one(db_entry)
     return resp.result(state.Ok, data=db_data)
 
 
-@router.get("/user-feeds/", response_model=Feed)
-async def list_user_feeds(
+@router.get("/user-entries/", response_model=Entry)
+async def list_user_entries(
     id: str = Query(default=None, description="mongodb ObjectId"),
     name: str = Query(default=None, max_length=50, description="fuzzy"),
     description: str = Query(default=None, max_length=50, description="fuzzy"),
@@ -255,36 +234,36 @@ async def list_user_feeds(
             "$lte": range_num["max_value"],
         }
     filters = {**filters, "create_by": user.id}
-    db_data = await paginated_find(Feed, filters, current, page_size, sort)
+    db_data = await paginated_find(Entry, filters, current, page_size, sort)
     return resp.result(state.Ok, data=db_data)
 
 
-@router.get("/user-feed/{feed_id}/", response_model=Feed)
-async def get_user_feed(
-    feed_id: PydanticObjectId, user: User = Depends(current_active_user)
+@router.get("/user-entry/{entry_id}/", response_model=Entry)
+async def get_user_entry(
+    entry_id: PydanticObjectId, user: User = Depends(current_active_user)
 ) -> Response:
     """
     get by id and current_user
     """
     # annotating
-    db_data = await Feed.find_one({"create_by": user.id, "_id": feed_id})
+    db_data = await Entry.find_one({"create_by": user.id, "_id": entry_id})
     return resp.result(state.Ok, data=db_data)
 
 
-@router.put("/user-feed/{feed_id}/", response_model=Feed)
-async def update_user_feed(
-    feed_id: PydanticObjectId,
-    feed: FeedUpdate,
+@router.put("/user-entry/{entry_id}/", response_model=Entry)
+async def update_user_entry(
+    entry_id: PydanticObjectId,
+    entry: EntryUpdate,
     user: User = Depends(current_active_user),
 ) -> Response:
     """
     put by id
     """
     # annotating
-    db_data = await Feed.find_one({"_id": feed_id}).update_one(
+    db_data = await Entry.find_one({"_id": entry_id}).update_one(
         {
             "$set": {
-                **feed.dict(),
+                **entry.dict(),
                 "update_by": user.id,
                 "update_time": datetime.utcnow(),
             }
@@ -293,21 +272,21 @@ async def update_user_feed(
     return resp.result(state.Ok, data=db_data)
 
 
-@router.delete("/user-feed/{feed_id}/", response_model={})
-async def delete_user_feed(
-    feed_id: PydanticObjectId,
+@router.delete("/user-entry/{entry_id}/", response_model={})
+async def delete_user_entry(
+    entry_id: PydanticObjectId,
     user: User = Depends(current_active_user),
 ) -> Response:
     """
     delete by id
     """
     # annotating
-    await Feed.find_one({"_id": feed_id, "create_by": user.id}).delete()
+    await Entry.find_one({"_id": entry_id, "create_by": user.id}).delete()
     return resp.result(state.Ok, data={})
 
 
-@router.get("/user-feeds/search/", response_model=list[Feed])
-async def search_user_feeds(
+@router.get("/user-entries/search/", response_model=list[Entry])
+async def search_user_entries(
     q: str = Query(default=None, max_length=50, description="fuzzy:name、description"),
     page_size: int = Query(example=10, description=""),
     current: int = Query(example=1, description=""),
@@ -329,13 +308,13 @@ async def search_user_feeds(
             "create_by": user.id,
         }
 
-    db_data = await paginated_find(Feed, filters, current, page_size, sort)
+    db_data = await paginated_find(Entry, filters, current, page_size, sort)
 
     return resp.result(state.Ok, data=db_data)
 
 
-@router.post("/user-feed/query/", response_model=list[Feed])
-async def query_user_feeds(
+@router.post("/user-entry/query/", response_model=list[Entry])
+async def query_user_entries(
     filters: dict = Body(default=None, example={"name": "string"}, description="query"),
     page_size: int = Query(example=10, description=""),
     current: int = Query(example=1, description=""),
@@ -351,5 +330,5 @@ async def query_user_feeds(
     """
     # annotating
     filters = {**filters, "create_by": user.id}
-    db_data = await paginated_find(Feed, filters, current, page_size, sort)
+    db_data = await paginated_find(Entry, filters, current, page_size, sort)
     return resp.result(state.Ok, data=db_data)

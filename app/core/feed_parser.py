@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any
 
 import feedparser
+from pydantic import HttpUrl
 
 from app.common.logger import log
 from app.common.response import state
@@ -16,7 +17,7 @@ def get_datetime_attr(thing: Any, key: str) -> datetime | None:
     return strutc_to_datetime(value) if value else None
 
 
-def process_entry(feed_url: str, entry: Any) -> EntryBase:
+def process_entry(feed_url: HttpUrl, entry: Any) -> EntryBase:
     content = []
     for data in entry.get("content", ()):
         data = {k: v for k, v in data.items() if k in ("value", "type", "language")}
