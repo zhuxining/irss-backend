@@ -41,23 +41,23 @@ async def d_feed(feed_id: PydanticObjectId) -> None:
     await Feed.find_one({"_id": feed_id}).delete()
 
 
-async def c_user_feed(feed: FeedCreate, create_by: PydanticObjectId | None) -> Feed:
+async def c_user_feed(feed: FeedCreate, owner_id: PydanticObjectId | None) -> Feed:
     db_feed = Feed(**feed.dict())
-    db_feed.create_by = create_by
+    db_feed.owner_id = owner_id
     db_feed.create_time = datetime.utcnow()
     await Feed.insert_one(db_feed)
     return db_feed
 
 
 async def r_user_feeds(user_id: PydanticObjectId | None) -> list[Feed]:
-    db_feeds = await Feed.find({"create_by": user_id}).to_list()
+    db_feeds = await Feed.find({"owner_id": user_id}).to_list()
     return db_feeds
 
 
 async def r_user_feed(
     feed_id: PydanticObjectId, user_id: PydanticObjectId | None
 ) -> Feed:
-    db_feed = await Feed.find_one({"create_by": user_id, "_id": feed_id})
+    db_feed = await Feed.find_one({"owner_id": user_id, "_id": feed_id})
     if db_feed is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="feed not found"
@@ -85,4 +85,4 @@ async def u_user_feed(
 async def d_user_feed(
     feed_id: PydanticObjectId, user_id: PydanticObjectId | None
 ) -> None:
-    await Feed.find_one({"_id": feed_id, "create_by": user_id}).delete()
+    await Feed.find_one({"_id": feed_id, "owner_id": user_id}).delete()

@@ -45,11 +45,6 @@ async def list_entries(
         },
         description="json",
     ),
-    range_num: Json = Query(
-        default=None,
-        example={"min_value": 0, "max_value": 100},
-        description="json",
-    ),
     page_size: int = Query(example=10, description=""),
     current: int = Query(example=1, description=""),
     sort: str = Query(
@@ -79,11 +74,7 @@ async def list_entries(
             "$gte": start,
             "$lte": end,
         }
-    if range_num:
-        filters["num"] = {
-            "$gte": range_num["min_value"],
-            "$lte": range_num["max_value"],
-        }
+
     db_data = await paginated_find(Entry, filters, current, page_size, sort)
 
     return resp.result(state.Ok, data=db_data)
@@ -111,7 +102,8 @@ async def update_entry(entry_id: PydanticObjectId, entry: EntryUpdate) -> Respon
     db_data = await Entry.find_one({"_id": entry_id}).update_one(
         {"$set": {**entry.dict(), "update_time": datetime.utcnow()}}
     )
-    return resp.result(state.Ok, data=db_data)
+    db_result = await Entry.find_one({"_id": entry_id})
+    return resp.result(state.Ok, data=db_result)
 
 
 @router.delete("/{entry_id}/", response_model={})
@@ -176,7 +168,7 @@ async def create_user_entry(
     """
     # annotating
     db_entry = Entry(**entry.dict())
-    db_entry.create_by = user.id
+    db_entry.owner_id = user.id
     db_entry.create_time = datetime.utcnow()
     db_data = await Entry.insert_one(db_entry)
     return resp.result(state.Ok, data=db_data)
@@ -193,11 +185,6 @@ async def list_user_entries(
             "start_time": "2000-01-01T00:00:00.000000",
             "end_time": "2100-01-01T00:00:00.000000",
         },
-        description="json",
-    ),
-    range_num: Json = Query(
-        default=None,
-        example={"min_value": 0, "max_value": 100},
         description="json",
     ),
     page_size: int = Query(example=10, description=""),
@@ -218,7 +205,7 @@ async def list_user_entries(
     if id:
         filters["_id"] = PydanticObjectId(id)
     if name:
-        filters["name"] = {"$regex": name}  # type:ignore
+        filters["name"] = {"$regex": name}
     if description:
         filters["description"] = {"$regex": description}
     if range_create_time:
@@ -228,12 +215,8 @@ async def list_user_entries(
             "$gte": start,
             "$lte": end,
         }
-    if range_num:
-        filters["num"] = {
-            "$gte": range_num["min_value"],
-            "$lte": range_num["max_value"],
-        }
-    filters = {**filters, "create_by": user.id}
+
+    filters = {**filters, "owner_id": user.id}
     db_data = await paginated_find(Entry, filters, current, page_size, sort)
     return resp.result(state.Ok, data=db_data)
 
@@ -246,7 +229,7 @@ async def get_user_entry(
     get by id and current_user
     """
     # annotating
-    db_data = await Entry.find_one({"create_by": user.id, "_id": entry_id})
+    db_data = await Entry.find_one({"owner_id": user.id, "_id": entry_id})
     return resp.result(state.Ok, data=db_data)
 
 
@@ -269,7 +252,8 @@ async def update_user_entry(
             }
         }
     )
-    return resp.result(state.Ok, data=db_data)
+    db_result = await Entry.find_one({"_id": entry_id})
+    return resp.result(state.Ok, data=db_result)
 
 
 @router.delete("/user-entry/{entry_id}/", response_model={})
@@ -281,7 +265,7 @@ async def delete_user_entry(
     delete by id
     """
     # annotating
-    await Entry.find_one({"_id": entry_id, "create_by": user.id}).delete()
+    await Entry.find_one({"_id": entry_id, "owner_id": user.id}).delete()
     return resp.result(state.Ok, data={})
 
 
@@ -305,7 +289,7 @@ async def search_user_entries(
     if q:
         filters = {
             "$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}],
-            "create_by": user.id,
+            "owner_id": user.id,
         }
 
     db_data = await paginated_find(Entry, filters, current, page_size, sort)
@@ -329,6 +313,6 @@ async def query_user_entries(
     post filters for query then paged
     """
     # annotating
-    filters = {**filters, "create_by": user.id}
+    filters = {**filters, "owner_id": user.id}
     db_data = await paginated_find(Entry, filters, current, page_size, sort)
     return resp.result(state.Ok, data=db_data)

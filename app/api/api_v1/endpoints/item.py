@@ -116,7 +116,8 @@ async def update_item(item_id: PydanticObjectId, item: schema.ItemUpdate) -> Res
     db_data = await model.Item.find_one({"_id": item_id}).update_one(
         {"$set": {**item.dict(), "update_time": datetime.utcnow()}}
     )
-    return resp.result(state.Ok, data=db_data)
+    db_result = await model.Item.find_one({"_id": item_id})
+    return resp.result(state.Ok, data=db_result)
 
 
 @router.delete("/item/{item_id}/", response_model={})
@@ -274,7 +275,8 @@ async def update_user_item(
             }
         }
     )
-    return resp.result(state.Ok, data=db_data)
+    db_result = await model.Item.find_one({"_id": item_id})
+    return resp.result(state.Ok, data=db_result)
 
 
 @router.delete("/user-item/{item_id}/", response_model={})

@@ -66,11 +66,6 @@ async def list_feeds(
         },
         description="json",
     ),
-    range_num: Json = Query(
-        default=None,
-        example={"min_value": 0, "max_value": 100},
-        description="json",
-    ),
     page_size: int = Query(example=10, description=""),
     current: int = Query(example=1, description=""),
     sort: str = Query(
@@ -100,11 +95,6 @@ async def list_feeds(
             "$gte": start,
             "$lte": end,
         }
-    if range_num:
-        filters["num"] = {
-            "$gte": range_num["min_value"],
-            "$lte": range_num["max_value"],
-        }
     db_data = await paginated_find(Feed, filters, current, page_size, sort)
 
     return resp.result(state.Ok, data=db_data)
@@ -132,7 +122,8 @@ async def update_feed(feed_id: PydanticObjectId, feed: FeedUpdate) -> Response:
     db_data = await Feed.find_one({"_id": feed_id}).update_one(
         {"$set": {**feed.dict(), "update_time": datetime.utcnow()}}
     )
-    return resp.result(state.Ok, data=db_data)
+    db_result = await Feed.find_one({"_id": feed_id})
+    return resp.result(state.Ok, data=db_result)
 
 
 @router.delete("/{feed_id}/", response_model={})
@@ -197,7 +188,7 @@ async def create_user_feed(
     """
     # annotating
     db_feed = Feed(**feed.dict())
-    db_feed.create_by = user.id
+    db_feed.owner_id = user.id
     db_feed.create_time = datetime.utcnow()
     db_data = await Feed.insert_one(db_feed)
     return resp.result(state.Ok, data=db_data)
@@ -214,11 +205,6 @@ async def list_user_feeds(
             "start_time": "2000-01-01T00:00:00.000000",
             "end_time": "2100-01-01T00:00:00.000000",
         },
-        description="json",
-    ),
-    range_num: Json = Query(
-        default=None,
-        example={"min_value": 0, "max_value": 100},
         description="json",
     ),
     page_size: int = Query(example=10, description=""),
@@ -239,7 +225,7 @@ async def list_user_feeds(
     if id:
         filters["_id"] = PydanticObjectId(id)
     if name:
-        filters["name"] = {"$regex": name}  # type:ignore
+        filters["name"] = {"$regex": name}
     if description:
         filters["description"] = {"$regex": description}
     if range_create_time:
@@ -249,12 +235,8 @@ async def list_user_feeds(
             "$gte": start,
             "$lte": end,
         }
-    if range_num:
-        filters["num"] = {
-            "$gte": range_num["min_value"],
-            "$lte": range_num["max_value"],
-        }
-    filters = {**filters, "create_by": user.id}
+
+    filters = {**filters, "owner_id": user.id}
     db_data = await paginated_find(Feed, filters, current, page_size, sort)
     return resp.result(state.Ok, data=db_data)
 
@@ -267,7 +249,7 @@ async def get_user_feed(
     get by id and current_user
     """
     # annotating
-    db_data = await Feed.find_one({"create_by": user.id, "_id": feed_id})
+    db_data = await Feed.find_one({"owner_id": user.id, "_id": feed_id})
     return resp.result(state.Ok, data=db_data)
 
 
@@ -290,7 +272,8 @@ async def update_user_feed(
             }
         }
     )
-    return resp.result(state.Ok, data=db_data)
+    db_result = await Feed.find_one({"_id": feed_id})
+    return resp.result(state.Ok, data=db_result)
 
 
 @router.delete("/user-feed/{feed_id}/", response_model={})
@@ -302,7 +285,7 @@ async def delete_user_feed(
     delete by id
     """
     # annotating
-    await Feed.find_one({"_id": feed_id, "create_by": user.id}).delete()
+    await Feed.find_one({"_id": feed_id, "owner_id": user.id}).delete()
     return resp.result(state.Ok, data={})
 
 
@@ -326,7 +309,7 @@ async def search_user_feeds(
     if q:
         filters = {
             "$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}],
-            "create_by": user.id,
+            "owner_id": user.id,
         }
 
     db_data = await paginated_find(Feed, filters, current, page_size, sort)
@@ -350,6 +333,6 @@ async def query_user_feeds(
     post filters for query then paged
     """
     # annotating
-    filters = {**filters, "create_by": user.id}
+    filters = {**filters, "owner_id": user.id}
     db_data = await paginated_find(Feed, filters, current, page_size, sort)
     return resp.result(state.Ok, data=db_data)
