@@ -136,30 +136,6 @@ async def delete_feed(feed_id: PydanticObjectId) -> Response:
     return resp.result(state.Ok, data={})
 
 
-@router.get("/search/", response_model=list[Feed])
-async def search_feeds(
-    q: str = Query(default=None, max_length=50, description="fuzzy:name、description"),
-    page_size: int = Query(example=10, description=""),
-    current: int = Query(example=1, description=""),
-    sort: str = Query(
-        default="create_time",
-        example="'id':-1",
-        description="1:asc, -1:desc, default desc, _id = create_time desc",
-    ),
-) -> Response:
-    """
-    get by fuzzy query then paged
-    """
-    # annotating
-    filters = {}
-    if q:
-        filters = {"$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}]}
-
-    db_data = await paginated_find(Feed, filters, current, page_size, sort)
-
-    return resp.result(state.Ok, data=db_data)
-
-
 @router.post("/query/", response_model=list[Feed])
 async def query_feeds(
     filters: dict = Body(default=None, example={"name": "string"}, description="query"),
@@ -168,7 +144,7 @@ async def query_feeds(
     sort: str = Query(
         default="create_time",
         example="'id':-1",
-        description="1:asc, -1:desc, default desc, _id = create_time desc",
+        desctiription="1:asc, -1:desc, default desc, _id = create_time desc",
     ),
 ) -> Response:
     """
@@ -308,7 +284,7 @@ async def search_user_feeds(
     filters = {}
     if q:
         filters = {
-            "$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}],
+            "$or": [{"title": {"$regex": q}}, {"subtitle": {"$regex": q}}],
             "owner_id": user.id,
         }
 

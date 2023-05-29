@@ -133,7 +133,7 @@ async def search_entries(
     # annotating
     filters = {}
     if q:
-        filters = {"$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}]}
+        filters = {"$or": [{"title": {"$regex": q}}, {"summary": {"$regex": q}}]}
 
     db_data = await paginated_find(Entry, filters, current, page_size, sort)
 
@@ -288,7 +288,7 @@ async def search_user_entries(
     filters = {}
     if q:
         filters = {
-            "$or": [{"name": {"$regex": q}}, {"description": {"$regex": q}}],
+            "$or": [{"title": {"$regex": q}}, {"summary": {"$regex": q}}],
             "owner_id": user.id,
         }
 

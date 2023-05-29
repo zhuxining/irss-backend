@@ -17,12 +17,12 @@ class FeedBase(BaseModel):
 
 
 class FeedCreate(FeedBase):
-    # view_layout: str | None = None
+    view_layout: str | None = None
     display_title: str | None = None
-    # updates_enabled: bool = True
-    # logo: list[Logo] | None = None
+    updates_enabled: bool = True
+    logo: list[Logo] | None = None
 
-    # owner_id: PydanticObjectId | None = None
+    owner_id: PydanticObjectId | None = None
 
 
 class FeedUpdate(FeedBase):
