@@ -10,17 +10,11 @@ from app.core.feed_parser import parse_feed
 from app.core.users import current_active_user
 from app.models.feeds import Feed
 from app.models.users import User
-from app.schemas.feeds import FeedBase, FeedCreate, FeedUpdate, FeedRead
+from app.schemas.feeds import FeedBase, FeedCreate, FeedUpdate, FeedRead, FeedBaseCreate
 from app.utils.tools_func import paginated_find
 from app.crud.feeds import c_feed, r_feed
 
 router = APIRouter()
-
-
-@router.get("/parser/")
-async def parser_url(url: HttpUrl) -> Response:
-    feed, entries = await parse_feed(url)
-    return resp.result(state.Ok, data=entries)
 
 
 @router.get("/parser0/")
@@ -44,12 +38,29 @@ async def create(url: HttpUrl, display_title: str) -> Response:
     return resp.result(state.Ok, data=db_data)
 
 
-@router.post("/", response_model=Feed)
-async def create_feed(feed: FeedCreate) -> Response:
+@router.get("/parser", response_model=FeedBase)
+async def parser_url(url: HttpUrl) -> Response:
+    """
+    parser an URL, example:
+
+    https://www.ithome.com/rss/
+
+    https://36kr.com/feed-article
+    """
+    feed, entries = await parse_feed(url)
+    return resp.result(state.Ok, data=feed)
+
+
+@router.post("/", response_model=FeedCreate)
+async def create_feed(feed_data: FeedBaseCreate) -> Response:
     """
     Create a new feed.
     """
-    db_data = await c_feed(feed)
+    feed, entries = await parse_feed(feed_data.url)
+    db_feed = FeedCreate(**feed.dict())
+    if db_feed.display_title == None:
+        db_feed.display_title = feed.title
+    db_data = await c_feed(db_feed)
     return resp.result(state.Ok, data=db_data)
 
 

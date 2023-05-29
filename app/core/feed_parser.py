@@ -55,6 +55,7 @@ SURVIVABLE_EXCEPTION_TYPES = (
 
 
 async def parse_feed(url) -> tuple[FeedBase, list[EntryBase]]:
+    url = url.lower()
     try:
         loop = asyncio.get_running_loop()
         future = loop.run_in_executor(None, feedparser.parse, url)
@@ -63,14 +64,14 @@ async def parse_feed(url) -> tuple[FeedBase, list[EntryBase]]:
             exception = d.get("bozo_exception")
             if isinstance(exception, SURVIVABLE_EXCEPTION_TYPES):
                 log.info(f"parse {url}: got {exception}")
-                raise state.BusinessError.set_msg("解析Rss地址超时,请检查URL是否正确后重试")
+                raise state.BusinessError.set_msg("Rss地址错误,请检查URL后重试")
             else:
                 log.info(f"parse {url}: error while parsing feed")
-                raise state.BusinessError.set_msg("解析Rss地址超时,请检查URL是否正确后重试")
+                raise state.BusinessError.set_msg("Rss地址错误,请检查URL后重试")
 
         if not d.version:
             log.info(f"parse {url}: unknown feed type")
-            raise state.NotFound.set_msg(f"unknown feed type")
+            raise state.BusinessError.set_msg(f"unknown feed type")
 
         feed = FeedBase(
             url=url,
@@ -79,7 +80,7 @@ async def parse_feed(url) -> tuple[FeedBase, list[EntryBase]]:
             link=d.feed.get("link"),
             author=d.feed.get("author"),
             subtitle=d.feed.get("subtitle"),
-            version=d.version,
+            version=(d.version).lower(),
         )
         entries: list[EntryBase] = []
         for e in d.entries:
