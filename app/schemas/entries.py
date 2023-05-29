@@ -9,7 +9,7 @@ from app.models.entries import Content, Enclosures
 from app.models.entry_tags import Tag
 
 
-class EntryBase(BaseModel):
+class EntryParser(BaseModel):
     feed_url: HttpUrl
 
     title: str | None = None
@@ -21,11 +21,11 @@ class EntryBase(BaseModel):
     enclosures: list[Enclosures] | None = None
 
 
-class EntryCreate(EntryBase):
+class EntryCreate(EntryParser):
     owner_id: PydanticObjectId | None = None
 
 
-class EntryUpdate(EntryBase):
+class EntryUpdate(EntryParser):
     is_read: bool = False
     read_modified: datetime | None = None
     read_later: bool = False
@@ -40,5 +40,5 @@ class EntryUpdate(EntryBase):
     update_time: datetime | None = None
 
 
-class EntryRead(EntryBase):
+class EntryRead(EntryParser):
     pass

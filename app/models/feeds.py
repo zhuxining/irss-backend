@@ -1,16 +1,19 @@
 from datetime import datetime
-
+from enum import Enum
 import pymongo
 from beanie import Document, PydanticObjectId
 from pydantic import BaseModel, Field, HttpUrl
 from pymongo import IndexModel
 
 
-class Logo(BaseModel):
-    url: HttpUrl
-    # The default feed.logo : "url + /favicon.ico"
-    is_default: bool = True
-    is_choose: bool = True
+class ListLayout(str, Enum):
+    a = "aaa"
+    b = "bbb"
+
+
+class ViewBrowser(str, Enum):
+    a = "aaa"
+    b = "bbb"
 
 
 class Feed(Document):
@@ -22,11 +25,13 @@ class Feed(Document):
     subtitle: str | None = None
     # The feed type and version,rss or atom
     version: str | None = None
+    # The default feed.logo : "link + /favicon.ico"
+    logo_url: str | None = None
 
-    view_layout: str | None = None
+    list_layout: ListLayout = ListLayout.a
+    view_browser: ViewBrowser = ViewBrowser.a
     display_title: str | None = None
     updates_enabled: bool = True
-    logo: list[Logo] | None = None
 
     owner_id: PydanticObjectId | None = None
     create_time: datetime = Field(default_factory=datetime.utcnow)

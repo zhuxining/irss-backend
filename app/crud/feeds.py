@@ -5,12 +5,11 @@ from fastapi import HTTPException, status
 
 from app.common.response import resp, state
 from app.models.feeds import Feed
-from app.schemas.feeds import FeedBase, FeedCreate, FeedUpdate, FeedRead
+from app.schemas.feeds import FeedParser, FeedCreate, FeedUpdate, FeedRead
 
 
 async def c_feed(feed: FeedCreate) -> Feed:
     db_feed = Feed(**feed.dict())
-    db_feed.create_time = datetime.utcnow()
     await Feed.insert_one(db_feed)
     return db_feed
 

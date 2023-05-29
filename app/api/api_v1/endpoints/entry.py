@@ -11,7 +11,7 @@ from app.core.users import current_active_user
 from app.crud.entries import c_entry
 from app.models.entries import Entry
 from app.models.users import User
-from app.schemas.entries import EntryBase, EntryCreate, EntryUpdate
+from app.schemas.entries import EntryParser, EntryCreate, EntryUpdate
 from app.utils.tools_func import paginated_find
 
 router = APIRouter()
