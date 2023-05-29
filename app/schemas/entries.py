@@ -38,3 +38,7 @@ class EntryUpdate(EntryBase):
     tag: list[Tag] | None = None
 
     update_time: datetime | None = None
+
+
+class EntryRead(EntryBase):
+    pass

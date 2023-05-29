@@ -89,6 +89,7 @@ async def list_items(
             "$gte": range_num["min_value"],
             "$lte": range_num["max_value"],
         }
+
     db_data = await paginated_find(model.Item, filters, current, page_size, sort)
 
     return resp.result(state.Ok, data=db_data)

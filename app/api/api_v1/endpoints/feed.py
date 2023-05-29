@@ -10,7 +10,7 @@ from app.core.feed_parser import parse_feed
 from app.core.users import current_active_user
 from app.models.feeds import Feed
 from app.models.users import User
-from app.schemas.feeds import FeedBase, FeedCreate, FeedUpdate
+from app.schemas.feeds import FeedBase, FeedCreate, FeedUpdate, FeedRead
 from app.utils.tools_func import paginated_find
 from app.crud.feeds import c_feed, r_feed
 

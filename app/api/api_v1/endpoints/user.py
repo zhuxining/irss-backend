@@ -23,6 +23,5 @@ router.include_router(
     response_model_exclude={"email"},
 )
 async def get_user(user_id: PydanticObjectId) -> Any:
-    UserRead = await User.find_one({"_id": user_id})
-    # return resp.result(state.Ok, data=UserRead)
-    return UserRead
+    db_data = await User.find_one({"_id": user_id}).project(UserRead)
+    return resp.result(state.Ok, data=db_data)

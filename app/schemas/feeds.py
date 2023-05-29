@@ -27,3 +27,7 @@ class FeedCreate(FeedBase):
 
 class FeedUpdate(FeedBase):
     update_time: datetime | None = None
+
+
+class FeedRead(FeedBase):
+    pass
