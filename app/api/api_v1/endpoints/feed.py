@@ -30,27 +30,9 @@ async def parser_url(url: HttpUrl) -> Response:
     return resp.result(state.Ok, data=feed)
 
 
-@router.post("/", response_model=FeedRead)
-async def create_feed(
-    feed_data: FeedCreate, user: User = Depends(current_active_user)
-) -> Response:
-    """
-    Create a new feed.
-    """
-    feed, entries = await parse_feed(feed_data.url)
-    db_data = await Feed.find_one({"owner_id": user.id, "url": feed.url})
-    if db_data:
-        raise state.AlreadyExists.set_msg("请勿重复添加")
-    else:
-        data_feed = Feed(**feed.dict())
-        if data_feed.display_title == None:
-            data_feed.display_title = feed.title
-        data_feed.owner_id = user.id
-        db_data = await Feed.insert_one(data_feed)
-    return resp.result(state.Ok, data=db_data)
-
-
-@router.get("/", response_model=list[FeedRead], response_description="list of feeds")
+@router.get(
+    "/list/", response_model=list[FeedRead], response_description="list of feeds"
+)
 async def list_feeds(
     id: str = Query(default=None, description="mongodb ObjectId"),
     display_title: str = Query(default=None, max_length=50, description="fuzzy"),
@@ -77,8 +59,31 @@ async def list_feeds(
     return resp.result(state.Ok, data=db_data)
 
 
+@router.post("/user-feed/", response_model=FeedRead)
+async def create_feed(
+    feed_create: FeedCreate, user: User = Depends(current_active_user)
+) -> Response:
+    """
+    Create a new feed.
+    """
+    feed, entries = await parse_feed(feed_create.url)
+
+    db_data = await Feed.find_one({"owner_id": user.id, "url": feed.url})
+    if db_data:
+        raise state.AlreadyExists.set_msg("请勿重复添加")
+    else:
+        data_feed = Feed(**feed.dict())
+        if feed_create.display_title:
+            data_feed.display_title = feed_create.display_title
+        else:
+            data_feed.display_title = feed.title
+        data_feed.owner_id = user.id
+        db_data = await Feed.insert_one(data_feed)
+    return resp.result(state.Ok, data=db_data)
+
+
 @router.get(
-    "/user-feed-list",
+    "/user-feed/list",
     response_model=list[FeedRead],
     response_description="list of feeds",
 )
@@ -157,7 +162,7 @@ async def delete_user_feed(
     return resp.result(state.Ok, data={})
 
 
-@router.get("/user-feeds/search/", response_model=list[FeedRead])
+@router.get("/user-feed/search/", response_model=list[FeedRead])
 async def search_user_feeds(
     q: str = Query(
         default=None, max_length=50, description="fuzzy:display_title、title"

@@ -10,12 +10,12 @@ from app.models.feeds import ListLayout, ViewBrowser
 class FeedParser(BaseModel):
     url: HttpUrl
     updated: datetime | None = None
-    title: str | None = None
+    title: str
     link: HttpUrl
     author: str | None = None
     subtitle: str | None = None
-    version: str | None = None
-    logo_url: str | None = None
+    version: str
+    logo_url: str
 
 
 class FeedBase(FeedParser):
