@@ -21,6 +21,7 @@ dependencies = [
     "setuptools>=67.7.2",
     "loguru>=0.7.0",
     "feedparser>=6.0.10",
+    "apscheduler>=3.10.1",
 ]
 requires-python = ">=3.10"
 license = {text = "MulanPSL2"}

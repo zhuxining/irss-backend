@@ -5,6 +5,7 @@ from app.common.db.init_db import init_db
 from app.common.extension.exc_handler import register_exception
 from app.common.logger import log
 from app.common.middleware.middleware_add import register_middleware
+from app.common.scheduler.scheduler import scheduler
 from app.config import settings
 
 app = FastAPI(
@@ -24,8 +25,10 @@ register_exception(app)
 async def on_startup() -> None:
     log.success("Application startup")
     await init_db()
+    scheduler.start()
 
 
 @app.on_event("shutdown")
 def shutdown_event() -> None:
     log.success("Application shutdown")
+    scheduler.shutdown()
