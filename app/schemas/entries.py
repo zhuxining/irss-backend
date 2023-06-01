@@ -21,11 +21,7 @@ class EntryParser(BaseModel):
     enclosures: list[Enclosures] | None = None
 
 
-class EntryCreate(EntryParser):
-    owner_id: PydanticObjectId | None = None
-
-
-class EntryUpdate(EntryParser):
+class EntryBase(EntryParser):
     is_read: bool = False
     read_modified: datetime | None = None
     read_later: bool = False
@@ -37,8 +33,19 @@ class EntryUpdate(EntryParser):
     star_modified: datetime | None = None
     tag: list[Tag] | None = None
 
-    update_time: datetime | None = None
 
-
-class EntryRead(EntryParser):
+class EntryCreate(BaseModel):
     pass
+
+
+class EntryUpdate(BaseModel):
+    is_read: bool = False
+    read_later: bool = False
+    is_hide: bool = False
+    is_star: bool = False
+    # tag: list[Tag] | None = None
+
+
+class EntryRead(EntryBase):
+    update_time: datetime | None = None
+    owner_id: PydanticObjectId | None = None
