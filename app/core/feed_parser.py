@@ -10,10 +10,12 @@ from pydantic import HttpUrl
 
 from app.common.logger import log
 from app.common.response import state
-from app.core.entry_append import get_entries_to_update
+from app.crud.entries import c_entry, cm_entry
 from app.schemas.entries import Content, Enclosures, EntryParser
 from app.schemas.feeds import FeedParser
 from app.utils.time_util import strutc_to_datetime
+
+# from app.core.entry_append import get_entries_to_update
 
 
 def get_datetime_attr(thing: Any, key: str) -> datetime | None:
@@ -100,9 +102,9 @@ async def parse_feed(url) -> tuple[FeedParser, list[EntryParser]]:
         entries: list[EntryParser] = []
         for e in d.entries:
             entry = process_entry(url, e)
-
             entries.append(entry)
-        executor.submit(get_entries_to_update, entries)
+
+        executor.submit(loop.run_until_complete, cm_entry(entries, loop))
         return feed, entries
 
     except asyncio.TimeoutError:

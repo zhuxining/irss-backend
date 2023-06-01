@@ -1,5 +1,7 @@
-from datetime import datetime
+import asyncio
 import time
+from datetime import datetime
+
 from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 
@@ -11,9 +13,19 @@ from app.schemas.entries import EntryParser, EntryUpdate
 async def c_entry(entry: EntryParser) -> Entry:
     db_entry = Entry(**entry.dict())
     db_entry.create_time = datetime.utcnow()
+    print(db_entry)
     await Entry.insert_one(db_entry)
-    time.sleep(2)
     return db_entry
+
+
+async def cm_entry(
+    entryies: list[EntryParser], loop: asyncio.AbstractEventLoop
+) -> None:
+    asyncio.set_event_loop(loop)
+    for entry in entryies:
+        db_entry = Entry(**entry.dict())
+        db_entry.create_time = datetime.utcnow()
+        await Entry.insert_one(db_entry)
 
 
 async def r_entries() -> list[Entry]:
