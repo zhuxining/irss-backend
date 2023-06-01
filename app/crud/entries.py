@@ -1,17 +1,18 @@
 from datetime import datetime
-
+import time
 from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 
 from app.common.response import resp, state
 from app.models.entries import Entry
-from app.schemas.entries import EntryCreate, EntryUpdate
+from app.schemas.entries import EntryParser, EntryUpdate
 
 
-async def c_entry(entry: EntryCreate) -> Entry:
+async def c_entry(entry: EntryParser) -> Entry:
     db_entry = Entry(**entry.dict())
     db_entry.create_time = datetime.utcnow()
     await Entry.insert_one(db_entry)
+    time.sleep(2)
     return db_entry
 
 
@@ -41,7 +42,7 @@ async def d_entry(entry_id: PydanticObjectId) -> None:
     await Entry.find_one({"_id": entry_id}).delete()
 
 
-async def c_user_entry(entry: EntryCreate, owner_id: PydanticObjectId | None) -> Entry:
+async def c_user_entry(entry: EntryParser, owner_id: PydanticObjectId | None) -> Entry:
     db_entry = Entry(**entry.dict())
     db_entry.owner_id = owner_id
     db_entry.create_time = datetime.utcnow()
