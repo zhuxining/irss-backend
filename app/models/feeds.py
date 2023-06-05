@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 import pymongo
 from beanie import Document, PydanticObjectId
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import Field, HttpUrl
 from pymongo import IndexModel
 
 

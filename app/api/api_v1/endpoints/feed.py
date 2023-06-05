@@ -1,14 +1,13 @@
 from datetime import datetime
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Body, Depends, Path, Query
+from fastapi import APIRouter, Body, Depends, Query
 from fastapi.responses import Response
 from pydantic import HttpUrl
 
 from app.common.response import resp, state
 from app.core.feed_parser import parse_feed
 from app.core.users import current_active_user
-from app.crud.feeds import c_feed, r_feed, r_user_feed, r_user_feeds
 from app.models.feeds import Feed
 from app.models.users import User
 from app.schemas.feeds import FeedCreate, FeedParser, FeedRead, FeedUpdate

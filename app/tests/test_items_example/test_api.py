@@ -16,5 +16,5 @@ def test_table_list():
     response = client.get(f"{settings.api_prefix}/example/table/list")
     assert response.status_code == 200
     content = response.json()
-    assert content["success"] == True
+    assert content["success"] is True
     assert "data" in content

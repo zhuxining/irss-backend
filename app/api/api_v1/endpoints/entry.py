@@ -1,17 +1,15 @@
 from datetime import datetime
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Body, Depends, Path, Query
+from fastapi import APIRouter, Body, Depends, Query
 from fastapi.responses import Response
 from pydantic import HttpUrl, Json
 
 from app.common.response import resp, state
-from app.core.feed_parser import parse_feed
 from app.core.users import current_active_user
-from app.crud.entries import c_entry
 from app.models.entries import Entry
 from app.models.users import User
-from app.schemas.entries import EntryParser, EntryCreate, EntryUpdate, EntryRead
+from app.schemas.entries import EntryRead, EntryUpdate
 from app.utils.tools_func import paginated_find
 
 router = APIRouter()

@@ -1,11 +1,10 @@
 import asyncio
-import time
 from datetime import datetime
 
 from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 
-from app.common.response import resp, state
+from app.common.response import state
 from app.models.entries import Entry
 from app.schemas.entries import EntryParser, EntryUpdate
 

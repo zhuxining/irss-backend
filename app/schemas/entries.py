@@ -1,9 +1,7 @@
 from datetime import datetime
-from typing import Any
 
 from beanie import PydanticObjectId
-from pydantic import BaseModel, Field, HttpUrl
-from pymongo import IndexModel
+from pydantic import BaseModel, HttpUrl
 
 from app.models.entries import Content, Enclosures
 from app.models.entry_tags import Tag

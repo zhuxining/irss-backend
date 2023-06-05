@@ -1,5 +1,4 @@
 import os
-from re import S
 from typing import Any, Optional, Union
 
 from beanie import PydanticObjectId

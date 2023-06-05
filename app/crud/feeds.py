@@ -3,9 +3,8 @@ from datetime import datetime
 from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 
-from app.common.response import resp, state
 from app.models.feeds import Feed
-from app.schemas.feeds import FeedParser, FeedCreate, FeedUpdate, FeedRead
+from app.schemas.feeds import FeedCreate, FeedUpdate, FeedRead
 
 
 async def c_feed(feed: FeedCreate) -> Feed:

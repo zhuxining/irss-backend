@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Any
 
 import pymongo
 from beanie import Document, PydanticObjectId
@@ -7,7 +6,6 @@ from pydantic import BaseModel, Field, HttpUrl
 from pymongo import IndexModel
 
 from app.models.entry_tags import Tag
-from app.models.feeds import Feed
 
 
 class Content(BaseModel):

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Body, Depends, Path, Query
+from fastapi import APIRouter, Body, Depends, Query
 from fastapi.responses import Response
 from pydantic import Json
 
@@ -114,7 +114,7 @@ async def update_item(item_id: PydanticObjectId, item: schema.ItemUpdate) -> Res
     Update an item by ID.
     """
     # Set the update_time field to the current time before updating in the database.
-    db_data = await model.Item.find_one({"_id": item_id}).update_one(
+    await model.Item.find_one({"_id": item_id}).update_one(
         {"$set": {**item.dict(), "update_time": datetime.utcnow()}}
     )
     db_result = await model.Item.find_one({"_id": item_id})
@@ -267,7 +267,7 @@ async def update_user_item(
     put by id
     """
     # annotating
-    db_data = await model.Item.find_one({"_id": item_id}).update_one(
+    await model.Item.find_one({"_id": item_id}).update_one(
         {
             "$set": {
                 **item.dict(),

@@ -1,7 +1,7 @@
 from typing import Any
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Response
+from fastapi import APIRouter
 
 from app.common.response import resp, state
 from app.core.users import fastapi_users

@@ -1,13 +1,8 @@
-import os
-import sys
-from datetime import datetime, timedelta
 
 from apscheduler.executors.pool import ProcessPoolExecutor, ThreadPoolExecutor
-from apscheduler.jobstores.mongodb import MongoDBJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import utc
 
-from app.common.db.database import client, db
 
 # jobstores = {"mongo": MongoDBJobStore(database="irss-test", client=client)}
 executors = {"default": ThreadPoolExecutor(20), "processpool": ProcessPoolExecutor(5)}

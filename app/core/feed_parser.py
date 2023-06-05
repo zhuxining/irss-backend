@@ -1,6 +1,5 @@
 import asyncio
 import concurrent.futures
-import time
 import urllib.parse
 from datetime import datetime
 from typing import Any
@@ -10,12 +9,10 @@ from pydantic import HttpUrl
 
 from app.common.logger import log
 from app.common.response import state
-from app.crud.entries import c_entry, cm_entry
+from app.core.entry_append import cm_entry
 from app.schemas.entries import Content, Enclosures, EntryParser
 from app.schemas.feeds import FeedParser
 from app.utils.time_util import strutc_to_datetime
-
-# from app.core.entry_append import get_entries_to_update
 
 
 def get_datetime_attr(thing: Any, key: str) -> datetime | None:
@@ -78,7 +75,7 @@ async def parse_feed(url) -> tuple[FeedParser, list[EntryParser]]:
 
         if not d.version:
             log.info(f"parse {url}: unknown feed type")
-            raise state.BusinessError.set_msg(f"unknown feed type")
+            raise state.BusinessError.set_msg("unknown feed type")
 
         if d.feed.get("link").startswith("http://") or d.feed.get("link").startswith(
             "https://"
