@@ -4,7 +4,7 @@
 # last locked with the following flags:
 #   pre: false
 #   features: []
-#   all-features: true
+#   all-features: false
 
 -e file:.
 anyio==3.7.0
@@ -17,7 +17,7 @@ click==8.1.3
 cryptography==41.0.1
 dnspython==2.3.0
 email-validator==2.0.0.post2
-fastapi==0.96.0
+fastapi==0.97.0
 fastapi-users==11.0.0
 fastapi-users-db-beanie==2.0.0
 feedparser==6.0.10
@@ -32,7 +32,7 @@ makefun==1.15.1
 motor==3.1.2
 passlib==1.7.4
 pycparser==2.21
-pydantic==1.10.8
+pydantic==1.10.9
 pyjwt==2.6.0
 pymongo==4.3.3
 python-multipart==0.0.6
