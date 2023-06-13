@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime
 
 from beanie import PydanticObjectId
@@ -12,19 +11,13 @@ from app.schemas.entries import EntryParser, EntryUpdate
 async def c_entry(entry: EntryParser) -> Entry:
     db_entry = Entry(**entry.dict())
     db_entry.create_time = datetime.utcnow()
-    print(db_entry)
     await Entry.insert_one(db_entry)
     return db_entry
 
 
-async def cm_entry(
-    entryies: list[EntryParser], loop: asyncio.AbstractEventLoop
-) -> None:
-    asyncio.set_event_loop(loop)
-    for entry in entryies:
-        db_entry = Entry(**entry.dict())
-        db_entry.create_time = datetime.utcnow()
-        await Entry.insert_one(db_entry)
+async def cm_entry(entries: list[EntryParser]) -> None:
+    entry_list = [Entry(**entry.dict()) for entry in entries]
+    await Entry.insert_many(entry_list)
 
 
 async def r_entries() -> list[Entry]:
