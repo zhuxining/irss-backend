@@ -1,5 +1,6 @@
 import asyncio
 import concurrent.futures
+from turtle import pu
 import urllib.parse
 from datetime import datetime
 from typing import Any
@@ -39,11 +40,15 @@ def process_entry(feed_url: HttpUrl, entry: Any) -> EntryParser:
             except (TypeError, ValueError):
                 del data["length"]
         enclosures.append(Enclosures(**data))
+    if get_datetime_attr(entry, "published_parsed"):
+        published = get_datetime_attr(entry, "published_parsed")
+    else:
+        published = get_datetime_attr(entry, "updated_parsed")
     entry = EntryParser(
         feed_url=feed_url,
         title=entry.get("title"),
         link=entry.get("link"),
-        published=get_datetime_attr(entry, "published_parsed"),
+        published=published,
         summary=entry.get("summary"),
         content=content,
         enclosures=enclosures,
@@ -99,11 +104,16 @@ async def parse_feed(url) -> tuple[FeedParser, list[EntryParser]]:
             newest_entry_pub_time=datetime.utcnow(),
         )
         entries: list[EntryParser] = []
-        entry_pub_time = get_datetime_attr(d.entries[0], "published_parsed")
+        if get_datetime_attr(d.entries[0], "published_parsed"):
+            entry_pub_time = get_datetime_attr(d.entries[0], "published_parsed")
+        else:
+            entry_pub_time = get_datetime_attr(d.entries[0], "updated_parsed")
+
         for e in d.entries:
             entry = process_entry(url, e)
             entries.append(entry)
-            if entry.published > entry_pub_time:
+
+            if entry.published >= entry_pub_time:
                 entry_pub_time = entry.published
 
         feed.newest_entry_pub_time = entry_pub_time
