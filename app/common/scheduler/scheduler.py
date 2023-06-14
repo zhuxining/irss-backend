@@ -26,6 +26,8 @@ scheduler = AsyncIOScheduler(
 scheduler.add_job(
     func=all_users_entry_append,
     trigger="interval",
-    seconds=10,
+    max_instances=4,
+    misfire_grace_time=None,
     # minutes=30,
+    seconds=10,
 )

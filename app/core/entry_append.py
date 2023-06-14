@@ -24,7 +24,7 @@ async def all_users_entry_append():
     feed_url_list = await Feed.distinct("url")
     for feed_url in feed_url_list:
         feed, entries = await parse_feed(feed_url)
-
+        print(feed_url)
         feed_owner_list = await Feed.find(
             Feed.url == feed_url, Feed.updates_enabled == True  # noqa: E712
         ).to_list()
