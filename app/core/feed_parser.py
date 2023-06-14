@@ -40,10 +40,19 @@ def process_entry(feed_url: HttpUrl, entry: Any) -> EntryParser:
             except (TypeError, ValueError):
                 del data["length"]
         enclosures.append(Enclosures(**data))
-    if get_datetime_attr(entry, "published_parsed"):
-        published = get_datetime_attr(entry, "published_parsed")
-    else:
-        published = get_datetime_attr(entry, "updated_parsed")
+
+    entry_published_time = get_datetime_attr(entry, "published_parsed")
+    entry_updated_time = get_datetime_attr(entry, "updated_parsed")
+    now_time = datetime.utcnow()
+
+    published = (
+        entry_published_time
+        if entry_published_time
+        else entry_updated_time
+        if entry_updated_time
+        else now_time
+    )
+
     entry = EntryParser(
         feed_url=feed_url,
         title=entry.get("title"),
@@ -104,10 +113,17 @@ async def parse_feed(url) -> tuple[FeedParser, list[EntryParser]]:
             newest_entry_pub_time=datetime.utcnow(),
         )
         entries: list[EntryParser] = []
-        if get_datetime_attr(d.entries[0], "published_parsed"):
-            entry_pub_time = get_datetime_attr(d.entries[0], "published_parsed")
-        else:
-            entry_pub_time = get_datetime_attr(d.entries[0], "updated_parsed")
+
+        entry_published_time = get_datetime_attr(d.entries[0], "published_parsed")
+        entry_updated_time = get_datetime_attr(d.entries[0], "updated_parsed")
+        now_time = datetime.utcnow()
+        entry_pub_time = (
+            entry_published_time
+            if entry_published_time
+            else entry_updated_time
+            if entry_updated_time
+            else now_time
+        )
 
         for e in d.entries:
             entry = process_entry(url, e)
