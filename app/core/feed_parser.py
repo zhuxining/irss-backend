@@ -96,12 +96,17 @@ async def parse_feed(url) -> tuple[FeedParser, list[EntryParser]]:
             subtitle=d.feed.get("subtitle"),
             version=(d.version).lower(),
             logo_url=link + "/favicon.ico",
+            newest_entry_pub_time=datetime.utcnow(),
         )
         entries: list[EntryParser] = []
+        entry_pub_time = get_datetime_attr(d.entries[0], "published_parsed")
         for e in d.entries:
             entry = process_entry(url, e)
             entries.append(entry)
+            if entry.published > entry_pub_time:
+                entry_pub_time = entry.published
 
+        feed.newest_entry_pub_time = entry_pub_time
         # executor.submit(loop.run_until_complete, cm_entry(entries, loop))
         return feed, entries
 

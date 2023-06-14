@@ -54,6 +54,15 @@ async def c_user_entry(entry: EntryParser, owner_id: PydanticObjectId | None) ->
     return db_entry
 
 
+async def cm_user_entry(
+    entries: list[EntryParser], owner_id: PydanticObjectId | None
+) -> None:
+    entry_list = [Entry(**entry.dict()) for entry in entries]
+    for entry in entry_list:
+        entry.owner_id = owner_id
+    await Entry.insert_many(entry_list)
+
+
 async def r_user_entries(user_id: PydanticObjectId | None) -> list[Entry]:
     db_entrys = await Entry.find({"owner_id": user_id}).to_list()
     return db_entrys

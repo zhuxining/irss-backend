@@ -16,6 +16,8 @@ class FeedParser(BaseModel):
     subtitle: str | None = None
     version: str
     logo_url: str
+    newest_entry_pub_time: datetime
+    last_parser_exception: None = None
 
 
 class FeedBase(FeedParser):

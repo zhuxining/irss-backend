@@ -1,16 +1,7 @@
-import asyncio
-from datetime import datetime
-from itertools import count
-from pydantic import BaseModel
-
 from app.core.feed_parser import parse_feed
-from app.crud.feeds import r_feeds, c_feed
-from app.crud.entries import c_entry, cm_entry
 from app.models.entries import Entry
 from app.models.feeds import Feed
-from app.schemas.entries import EntryParser
-
-# from app.common.scheduler.scheduler import scheduler
+from beanie import PydanticObjectId
 
 
 def should_update_feed() -> bool:
@@ -29,17 +20,40 @@ def should_update_entry() -> bool:
 #         await Entry.insert_one(db_entry)
 
 
-class OutputFeed(BaseModel):
-    urls: str
-    count: int
-
-
-async def get_feed_to_update():
+async def all_users_entry_append():
     feed_url_list = await Feed.distinct("url")
-    # print(feed_url_list)
     for feed_url in feed_url_list:
-        # print(feed_url)
         feed, entries = await parse_feed(feed_url)
-        for entry in entries:
-            db_entry = Entry(**entry.dict())
-            await Entry.insert_one(db_entry)
+
+        feed_owner_list = await Feed.find(
+            Feed.url == feed_url, Feed.updates_enabled == True  # noqa: E712
+        ).to_list()
+        for feed_owner in feed_owner_list:
+            db_entry_list = []
+            entry_list = [Entry(**entry.dict()) for entry in entries]
+            for entry in entry_list:
+                entry.owner_id = feed_owner.owner_id
+                if entry.published > feed_owner.newest_entry_pub_time:
+                    db_entry_list.append(entry)
+            if db_entry_list != []:
+                await Entry.insert_many(db_entry_list)
+            await Feed.find(Feed.id == feed_owner.id).update(
+                {"$set": {Feed.newest_entry_pub_time: feed.newest_entry_pub_time}}
+            )
+
+
+async def user_entry_append(owner_id: PydanticObjectId):
+    feed_owner_list = await Feed.find(Feed.owner_id == owner_id).to_list()
+    for feed_owner in feed_owner_list:
+        feed, entries = await parse_feed(feed_owner.url)
+        db_entry_list = []
+        entry_list = [Entry(**entry.dict()) for entry in entries]
+        for entry in entry_list:
+            entry.owner_id = feed_owner.owner_id
+            if entry.published > feed_owner.newest_entry_pub_time:
+                db_entry_list.append(entry)
+        if db_entry_list != []:
+            await Entry.insert_many(db_entry_list)
+        await Feed.find(Feed.id == feed_owner.id).update(
+            {"$set": {Feed.newest_entry_pub_time: feed.newest_entry_pub_time}}
+        )

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Body, Depends, Query
+from fastapi import APIRouter, Body, Depends, Query, BackgroundTasks
 from fastapi.responses import Response
 from pydantic import HttpUrl, Json
 
@@ -11,6 +11,8 @@ from app.models.entries import Entry
 from app.models.users import User
 from app.schemas.entries import EntryRead, EntryUpdate
 from app.utils.tools_func import paginated_find
+from app.core.entry_append import user_entry_append
+
 
 router = APIRouter()
 
@@ -94,6 +96,8 @@ async def search_entries(
 
 @router.get("/user-entries/", response_model=EntryRead)
 async def list_user_entries(
+    background_tasks: BackgroundTasks,
+    is_reload_parser: bool = Query(default=False),
     feed_url: HttpUrl = Query(default=None),
     is_read: bool = Query(default=False),
     read_later: bool = Query(default=False),
@@ -143,6 +147,8 @@ async def list_user_entries(
         }
 
     filters = {**filters, "owner_id": user.id}
+    if is_reload_parser:
+        await user_entry_append(user.id)
     db_data = await paginated_find(Entry, filters, current, page_size, sort)
     return resp.result(state.Ok, data=db_data)
 

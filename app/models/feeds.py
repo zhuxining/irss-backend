@@ -36,7 +36,8 @@ class Feed(Document):
     owner_id: PydanticObjectId | None = None
     create_time: datetime = Field(default_factory=datetime.utcnow)
     update_time: datetime | None = None
-    last_exception: None = None
+    newest_entry_pub_time: datetime
+    last_parser_exception: None = None
 
     class Settings:
         name = "feed"

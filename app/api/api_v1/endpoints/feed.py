@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Body, Depends, Query
+from fastapi import APIRouter, Body, Depends, Query, BackgroundTasks
 from fastapi.responses import Response
 from pydantic import HttpUrl
 
@@ -12,6 +12,7 @@ from app.models.feeds import Feed
 from app.models.users import User
 from app.schemas.feeds import FeedCreate, FeedParser, FeedRead, FeedUpdate
 from app.utils.tools_func import paginated_find
+from app.crud.entries import cm_user_entry
 
 router = APIRouter()
 
@@ -60,7 +61,9 @@ async def list_feeds(
 
 @router.post("/user-feed/", response_model=FeedRead)
 async def create_feed(
-    feed_create: FeedCreate, user: User = Depends(current_active_user)
+    background_tasks: BackgroundTasks,
+    feed_create: FeedCreate,
+    user: User = Depends(current_active_user),
 ) -> Response:
     """
     Create a new feed.
@@ -78,6 +81,7 @@ async def create_feed(
             data_feed.display_title = feed.title
         data_feed.owner_id = user.id
         db_data = await Feed.insert_one(data_feed)
+    background_tasks.add_task(cm_user_entry, entries, user.id)
     return resp.result(state.Ok, data=db_data)
 
 
