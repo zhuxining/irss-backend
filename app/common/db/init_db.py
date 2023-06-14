@@ -16,5 +16,5 @@ async def init_db() -> None:
             feed_groups.Group,
             entries.Entry,
             entry_tags.Tag,
-        ],  # type: ignore
+        ],
     )

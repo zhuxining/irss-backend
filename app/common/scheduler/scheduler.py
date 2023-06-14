@@ -3,11 +3,10 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import utc
 from app.core.entry_append import all_users_entry_append
 
-# jobstores = {"mongo": MongoDBJobStore(database="irss-test", client=client)}
+
 executors = {"default": AsyncIOExecutor()}
 job_defaults = {"coalesce": False, "max_instances": 3}
 scheduler = AsyncIOScheduler(
-    # jobstores=jobstores,
     executors=executors,
     job_defaults=job_defaults,
     timezone=utc,
@@ -27,5 +26,6 @@ scheduler = AsyncIOScheduler(
 scheduler.add_job(
     func=all_users_entry_append,
     trigger="interval",
-    minutes=30,
+    seconds=10,
+    # minutes=30,
 )
