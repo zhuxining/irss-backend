@@ -64,7 +64,7 @@ async def parse_feed(url) -> tuple[FeedParser, list[EntryParser]]:
     try:
         loop = asyncio.get_running_loop()
         future = loop.run_in_executor(None, feedparser.parse, url)
-        d = await asyncio.wait_for(future, timeout=10)
+        d = await asyncio.wait_for(future, timeout=6)
         if d.get("bozo"):
             exception = d.get("bozo_exception")
             if isinstance(exception, SURVIVABLE_EXCEPTION_TYPES):

@@ -2,6 +2,7 @@ from app.core.feed_parser import parse_feed
 from app.models.entries import Entry
 from app.models.feeds import Feed
 from beanie import PydanticObjectId
+from app.common.logger import log
 
 
 def should_update_feed() -> bool:
@@ -21,10 +22,11 @@ def should_update_entry() -> bool:
 
 
 async def all_users_entry_append():
+    log.success("start: all_users_entry_append")
     feed_url_list = await Feed.distinct("url")
     for feed_url in feed_url_list:
         feed, entries = await parse_feed(feed_url)
-        print(feed_url)
+        # print(feed_url)
         feed_owner_list = await Feed.find(
             Feed.url == feed_url, Feed.updates_enabled == True  # noqa: E712
         ).to_list()
@@ -40,9 +42,11 @@ async def all_users_entry_append():
             await Feed.find(Feed.id == feed_owner.id).update(
                 {"$set": {Feed.newest_entry_pub_time: feed.newest_entry_pub_time}}
             )
+    log.success("end: all_users_entry_append")
 
 
 async def user_entry_append(owner_id: PydanticObjectId):
+    log.success("start: user_entry_append")
     feed_owner_list = await Feed.find(Feed.owner_id == owner_id).to_list()
     for feed_owner in feed_owner_list:
         feed, entries = await parse_feed(feed_owner.url)
@@ -57,3 +61,4 @@ async def user_entry_append(owner_id: PydanticObjectId):
         await Feed.find(Feed.id == feed_owner.id).update(
             {"$set": {Feed.newest_entry_pub_time: feed.newest_entry_pub_time}}
         )
+    log.success("start: user_entry_append")

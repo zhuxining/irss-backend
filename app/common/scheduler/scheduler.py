@@ -28,6 +28,6 @@ scheduler.add_job(
     trigger="interval",
     max_instances=4,
     misfire_grace_time=None,
-    # minutes=30,
-    seconds=10,
+    minutes=30,
+    # seconds=10,
 )
