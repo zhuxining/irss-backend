@@ -1,18 +1,17 @@
 from datetime import datetime
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Body, Depends, Query, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, Query
 from fastapi.responses import Response
 from pydantic import HttpUrl, Json
 
 from app.common.response import resp, state
+from app.core.entry_append import user_entry_append
 from app.core.users import current_active_user
 from app.models.entries import Entry
 from app.models.users import User
 from app.schemas.entries import EntryRead, EntryUpdate
 from app.utils.tools_func import paginated_find
-from app.core.entry_append import user_entry_append
-
 
 router = APIRouter()
 
@@ -57,8 +56,8 @@ async def list_entries(
     if is_star:
         filters["is_star"] = is_star
     if range_create_time:
-        start = datetime.fromisoformat(range_create_time["start_time"])
-        end = datetime.fromisoformat(range_create_time["end_time"])
+        start: datetime = datetime.fromisoformat(range_create_time["start_time"])
+        end: datetime = datetime.fromisoformat(range_create_time["end_time"])
 
         # Use $gt and $lt instead of $gte and $lte to exclude the start and end times.
         filters["create_time"] = {
@@ -137,8 +136,8 @@ async def list_user_entries(
     if is_star:
         filters["is_star"] = is_star
     if range_create_time:
-        start = datetime.fromisoformat(range_create_time["start_time"])
-        end = datetime.fromisoformat(range_create_time["end_time"])
+        start: datetime = datetime.fromisoformat(range_create_time["start_time"])
+        end: datetime = datetime.fromisoformat(range_create_time["end_time"])
 
         # Use $gt and $lt instead of $gte and $lte to exclude the start and end times.
         filters["create_time"] = {

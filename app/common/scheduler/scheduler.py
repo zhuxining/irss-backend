@@ -1,8 +1,8 @@
 from apscheduler.executors.asyncio import AsyncIOExecutor
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pytz import utc
-from app.core.entry_append import all_users_entry_append
 
+from app.core.entry_append import all_users_entry_append
 
 executors = {"default": AsyncIOExecutor()}
 job_defaults = {"coalesce": False, "max_instances": 3}

@@ -1,8 +1,9 @@
+from beanie import PydanticObjectId
+
+from app.common.logger import log
 from app.core.feed_parser import parse_feed
 from app.models.entries import Entry
 from app.models.feeds import Feed
-from beanie import PydanticObjectId
-from app.common.logger import log
 
 
 def should_update_feed() -> bool:

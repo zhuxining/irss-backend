@@ -1,6 +1,4 @@
 import asyncio
-import concurrent.futures
-from turtle import pu
 import urllib.parse
 from datetime import datetime
 from typing import Any
@@ -10,8 +8,6 @@ from pydantic import HttpUrl
 
 from app.common.logger import log
 from app.common.response import state
-
-# from app.core.entry_append import cm_entry
 from app.schemas.entries import Content, Enclosures, EntryParser
 from app.schemas.feeds import FeedParser
 from app.utils.time_util import strutc_to_datetime
@@ -74,7 +70,6 @@ SURVIVABLE_EXCEPTION_TYPES = (
 
 async def parse_feed(url) -> tuple[FeedParser, list[EntryParser]]:
     url = url.lower()
-    # executor = concurrent.futures.ThreadPoolExecutor()
     try:
         loop = asyncio.get_running_loop()
         future = loop.run_in_executor(None, feedparser.parse, url)
@@ -133,7 +128,6 @@ async def parse_feed(url) -> tuple[FeedParser, list[EntryParser]]:
                 entry_pub_time = entry.published
 
         feed.newest_entry_pub_time = entry_pub_time
-        # executor.submit(loop.run_until_complete, cm_entry(entries, loop))
         return feed, entries
 
     except asyncio.TimeoutError:
