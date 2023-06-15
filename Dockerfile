@@ -1,16 +1,13 @@
-FROM python:3.11
+FROM python:3.11-slim
 
-# Set the working directory inside the container to /irss/
-WORKDIR /irss-backend
+WORKDIR /usr/src/irss-backend
 
-# Copy the requirements.lock file from the host machine to the container's /irss/ directory
-COPY ./requirements.lock ./requirements.lock
+COPY ./requirements.lock .
 
-# Install all required Python packages listed in requirements.lock using pip
-RUN pip install --no-cache-dir --upgrade -r /irss/requirements.lock
+RUN sed '/-e/d' requirements.lock > requirements.lock
 
-# Copy the app directory from the host machine to the container's /irss/ directory
-COPY ./app /irss-backend/app
+RUN pip install --no-cache-dir --upgrade -r requirements.lock
 
-# Start Uvicorn with our main FastAPI app on 0.0.0.0:80 inside the container
+COPY ./app /usr/src/irss-backend/app
+
 CMD [ "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80","--reload"]
