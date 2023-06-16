@@ -21,7 +21,8 @@ stages:
         commands:
           - pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
           - '# 可以使用pip下载依赖'
-          - '# pip install --user -r requirements.txt'
+          - sed '/-e/d' requirements.lock > requirements.lock
+          - pip install --user -r requirements.txt
           - python --version
         artifacts:
           - name: BUILD_ARTIFACT
