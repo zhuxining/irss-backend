@@ -138,4 +138,8 @@ dmypy.json
 cython_debug/
 
 
+# ruff
+.ruff_cache/
+
+# MacOS
 .DS_Store
