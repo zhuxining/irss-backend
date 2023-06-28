@@ -5,16 +5,18 @@ description = "Add a short description here"
 authors = [
     { name = "zhuxining", email = "zhuxining@outlook.com" }
 ]
-dependencies = [    
-    "fastapi-users[beanie,oauth]>=11.0.0",
-    "fastapi>=0.95.1",
+dependencies = [
+    "fastapi-users[beanie,oauth]>=12.0.0",
+    "fastapi>=0.100.0b1",
     "uvicorn>=0.22.0",
     "setuptools>=67.7.2",
     "loguru>=0.7.0",
     "feedparser>=6.0.10",
-    "apscheduler>=3.10.1",]
+    "apscheduler>=3.10.1",
+    "pydantic>=2.0b3",
+]
 readme = "README.md"
-requires-python = ">= 3.8"
+requires-python = ">= 3.11"
 
 [build-system]
 requires = ["hatchling"]
@@ -50,10 +52,10 @@ disallow_any_generics = true
 check_untyped_defs = true
 no_implicit_reexport = true
 ignore_missing_imports = true
-ignore_missing_annotations = false 
+ignore_missing_annotations = false
 allow_subclassing_private_name = true
 allow_redefinition_of_alias_in_stub = true
-postpone_any_foreground = true   
+postpone_any_foreground = true
 check_typeshed_only = true
 strict_optional = true
 warn_error = true
