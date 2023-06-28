@@ -136,3 +136,10 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+
+# ruff
+.ruff_cache/
+
+# MacOS
+.DS_Store
