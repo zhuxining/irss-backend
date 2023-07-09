@@ -18,7 +18,7 @@ click==8.1.4
 cryptography==41.0.1
 dnspython==2.3.0
 email-validator==2.0.0.post2
-fastapi==0.100.0b3
+fastapi==0.100.0
 fastapi-users==12.0.0
 fastapi-users-db-beanie==3.0.0
 feedparser==6.0.10
@@ -28,13 +28,10 @@ httpx==0.24.1
 httpx-oauth==0.13.0
 idna==3.4
 iniconfig==2.0.0
-isort==5.12.0
 lazy-model==0.0.5
 loguru==0.7.0
 makefun==1.15.1
 motor==3.2.0
-mypy==1.4.1
-mypy-extensions==1.0.0
 packaging==23.1
 passlib==1.7.4
 pluggy==1.2.0
