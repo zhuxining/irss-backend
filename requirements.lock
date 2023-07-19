@@ -14,12 +14,12 @@ bcrypt==4.0.1
 beanie==1.19.2
 certifi==2023.5.7
 cffi==1.15.1
-click==8.1.4
-cryptography==41.0.1
-dnspython==2.3.0
+click==8.1.6
+cryptography==41.0.2
+dnspython==2.4.0
 email-validator==2.0.0.post2
 fastapi==0.100.0
-fastapi-users==12.0.0
+fastapi-users==12.1.0
 fastapi-users-db-beanie==3.0.0
 feedparser==6.0.10
 h11==0.14.0
@@ -33,10 +33,10 @@ makefun==1.15.1
 motor==3.2.0
 passlib==1.7.4
 pycparser==2.21
-pydantic==2.0.2
-pydantic-core==2.1.2
+pydantic==2.0.3
+pydantic-core==2.3.0
 pyjwt==2.7.0
-pymongo==4.4.0
+pymongo==4.4.1
 python-multipart==0.0.6
 pytz==2023.3
 sgmllib3k==1.0.0
@@ -46,6 +46,6 @@ starlette==0.27.0
 toml==0.10.2
 typing-extensions==4.7.1
 tzlocal==5.0.1
-uvicorn==0.22.0
+uvicorn==0.23.1
 # The following packages are considered to be unsafe in a requirements file:
 setuptools==68.0.0
