@@ -27,7 +27,7 @@ def register_middleware(app: FastAPI) -> None:
     if settings.middleware_cors:
         app.add_middleware(
             CORSMiddleware,
-            allow_origins=settings.cors_origins,
+            # allow_origins=settings.cors_origins,
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],

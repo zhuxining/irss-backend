@@ -1,4 +1,4 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -37,12 +37,12 @@ class Settings(BaseSettings):
     middleware_trusted_host: bool = False
     middleware_gzip: bool = True
     middleware_cors: bool = True
-    cors_origins = [
-        "http://localhost.tiangolo.com",
-        "https://localhost.tiangolo.com",
-        "http://localhost",
-        "http://localhost:8080",
-    ]
+    # cors_origins = '[
+    #     "http://localhost.tiangolo.com",
+    #     "https://localhost.tiangolo.com",
+    #     "http://localhost",
+    #     "http://localhost:8080",
+    # ]'
 
     class Config:
         env_file = ".env"
