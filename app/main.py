@@ -21,14 +21,12 @@ register_middleware(app)
 register_exception(app)
 
 
-@app.on_event("startup")
 async def on_startup() -> None:
     log.success("Application startup")
     await init_db()
     scheduler.start()
 
 
-@app.on_event("shutdown")
 def shutdown_event() -> None:
     log.success("Application shutdown")
     scheduler.shutdown()

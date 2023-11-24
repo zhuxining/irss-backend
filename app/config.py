@@ -50,9 +50,9 @@ class Settings(BaseSettings):
         case_sensitive = True
         # json_encoders = {datetime.datetime: lambda dt: dt.isoformat()}
         extra = "ignore"
-        allow_population_by_field_name = True
+        populate_by_name = True
         validate_assignment = True
-        validate_all = True
+        validate_default = True
         extra = "ignore"
         env_prefix = "API_"
 
